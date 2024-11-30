@@ -1,0 +1,556 @@
+[debug] [2024-11-30T16:38:05.118Z] ----------------------------------------------------------------------
+[debug] [2024-11-30T16:38:05.124Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2024-11-30T16:38:05.125Z] CLI Version:   13.27.0
+[debug] [2024-11-30T16:38:05.126Z] Platform:      win32
+[debug] [2024-11-30T16:38:05.126Z] Node Version:  v20.18.0
+[debug] [2024-11-30T16:38:05.126Z] Time:          Sat Nov 30 2024 11:38:05 GMT-0500 (hora estándar de Colombia)
+[debug] [2024-11-30T16:38:05.126Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-11-30T16:38:05.139Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-11-30T16:38:05.140Z] > authorizing via signed-in user (jair.roa.calvo@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\EAN\Videos\Jair\malagon
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-11-30T16:38:11.821Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:11.822Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:11.826Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2024-11-30T16:38:12.360Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2024-11-30T16:38:12.360Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project malagon-ea242 (Malagon) 
+[info] 
+=== Dataconnect Setup
+[debug] [2024-11-30T16:38:14.755Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:14.755Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:14.756Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo [none]
+[debug] [2024-11-30T16:38:15.082Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo 200
+[debug] [2024-11-30T16:38:15.083Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo {"name":"projects/malagon-ea242/billingInfo","projectId":"malagon-ea242","billingAccountName":"","billingEnabled":false}
+[info] i  dataconnect: ensuring required API sqladmin.googleapis.com is enabled... 
+[debug] [2024-11-30T16:38:15.084Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:15.084Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:15.084Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com [none]
+[debug] [2024-11-30T16:38:15.084Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:38:15.782Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com 200
+[debug] [2024-11-30T16:38:15.783Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com [omitted]
+[info] +  dataconnect: required API sqladmin.googleapis.com is enabled 
+[info] i  dataconnect\dataconnect.yaml is unchanged 
+[info] i  dataconnect\schema\schema.gql is unchanged 
+[info] +  Wrote dataconnect\connector\connector.yaml 
+[info] i  dataconnect\connector\queries.gql is unchanged 
+[info] i  dataconnect\connector\mutations.gql is unchanged 
+[info] +  Detected WEB app in directory C:\Users\EAN\Videos\Jair\malagon 
+[info] i  Wrote new config to C:\Users\EAN\Videos\Jair\malagon\dataconnect\connector/connector.yaml 
+[info] I1130 11:38:25.548412   26304 codegen.go:82] [connector "default" javascriptSdk] Generating sources into "C:\\Users\\EAN\\Videos\\Jair\\malagon\\dataconnect-generated\\js\\default-connector"
+I1130 11:38:25.767965   26304 generate.go:40] Generated all sources. Writing them to disk...
+I1130 11:38:25.773830   26304 collector.go:107] connector "default" javascriptSdk wrote into "C:\\Users\\EAN\\Videos\\Jair\\malagon\\dataconnect-generated\\js\\default-connector"
+Generated sources: esm\package.json [17B] index.cjs.js [221B] package.json [623B] index.d.ts [264B] esm\index.esm.js [180B] 
+I1130 11:38:25.835089   26304 installsdk.go:76] Running command: C:\Program Files\nodejs\npm.cmd install file:dataconnect-generated\js\default-connector
+
+[info] i  Generated SDK code for default 
+[info] +  If you'd like to add more generated SDKs to your app your later, run firebase init dataconnect:sdk again 
+[info] i  If you'd like to provision a CloudSQL Postgres instance on the Firebase Data Connect no-cost trial:
+1. Please upgrade to the pay-as-you-go (Blaze) billing plan. Visit the following page:
+     https://console.firebase.google.com/project/malagon-ea242/usage/details
+2. Run firebase init dataconnect again to configure the Cloud SQL instance.
+3. Run firebase deploy --only dataconnect to deploy your Data Connect service. 
+[info] 
+=== Firestore Setup
+[debug] [2024-11-30T16:38:32.085Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:32.086Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:32.086Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com [none]
+[debug] [2024-11-30T16:38:32.086Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:38:32.767Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com 200
+[debug] [2024-11-30T16:38:32.767Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com [omitted]
+[debug] [2024-11-30T16:38:32.768Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:32.768Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:32.768Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) [none]
+[debug] [2024-11-30T16:38:33.507Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) 200
+[debug] [2024-11-30T16:38:33.508Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) {"name":"projects/malagon-ea242/databases/(default)","uid":"67b94e98-fda7-4929-b252-0e7290f67e46","createTime":"2024-11-30T16:37:26.677779Z","updateTime":"2024-11-30T16:37:26.677779Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2024-11-30T16:37:26.677779Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","etag":"IPXI7ZG/hIoDMJPqkPK+hIoD"}
+[debug] [2024-11-30T16:38:33.508Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-11-30T16:38:33.508Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-11-30T16:38:33.508Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-11-30T16:38:33.509Z] > authorizing via signed-in user (jair.roa.calvo@gmail.com)
+[debug] [2024-11-30T16:38:33.509Z] [iam] checking project malagon-ea242 for permissions ["firebase.projects.get"]
+[debug] [2024-11-30T16:38:33.509Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:33.510Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:33.510Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions [none]
+[debug] [2024-11-30T16:38:33.510Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:38:33.510Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-11-30T16:38:34.086Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions 200
+[debug] [2024-11-30T16:38:34.087Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-11-30T16:38:40.086Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:40.087Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:40.087Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases pageSize=10&pageToken=
+[debug] [2024-11-30T16:38:40.388Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases 200
+[debug] [2024-11-30T16:38:40.388Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases {"releases":[{"name":"projects/malagon-ea242/releases/cloud.firestore","rulesetName":"projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e","createTime":"2024-11-30T16:37:29.068221Z","updateTime":"2024-11-30T16:37:29.068221Z"}]}
+[debug] [2024-11-30T16:38:40.388Z] Found ruleset: projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e
+[debug] [2024-11-30T16:38:40.389Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:40.389Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:40.389Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e [none]
+[debug] [2024-11-30T16:38:40.526Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e 200
+[debug] [2024-11-30T16:38:40.527Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e [omitted]
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-11-30T16:38:44.078Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:44.078Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:44.078Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:44.078Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:38:44.078Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2024-11-30T16:38:44.081Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2024-11-30T16:38:44.679Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2024-11-30T16:38:44.679Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes {}
+[debug] [2024-11-30T16:38:44.847Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2024-11-30T16:38:44.847Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/malagon-ea242/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[info] 
+=== Genkit Setup
+[debug] [2024-11-30T16:38:45.022Z] Error: spawnSync npm ENOENT
+    at Object.spawnSync (node:internal/child_process:1124:20)
+    at spawnSync (node:child_process:877:24)
+    at execFileSync (node:child_process:920:15)
+    at getGenkitVersion (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\features\genkit\index.js:29:58)
+    at doSetup (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\features\genkit\index.js:56:30)
+    at init (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\index.js:41:15)
+    at init (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\index.js:42:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2024-11-30T16:40:12.690Z] ----------------------------------------------------------------------
+[debug] [2024-11-30T16:40:12.697Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init --debug
+[debug] [2024-11-30T16:40:12.698Z] CLI Version:   13.27.0
+[debug] [2024-11-30T16:40:12.698Z] Platform:      win32
+[debug] [2024-11-30T16:40:12.698Z] Node Version:  v20.18.0
+[debug] [2024-11-30T16:40:12.698Z] Time:          Sat Nov 30 2024 11:40:12 GMT-0500 (hora estándar de Colombia)
+[debug] [2024-11-30T16:40:12.699Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-11-30T16:40:12.713Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-11-30T16:40:12.716Z] > authorizing via signed-in user (jair.roa.calvo@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\EAN\Videos\Jair\malagon
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-11-30T16:40:19.472Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:19.472Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:19.475Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2024-11-30T16:40:20.299Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2024-11-30T16:40:20.299Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project malagon-ea242 (Malagon) 
+[info] 
+=== Dataconnect Setup
+[debug] [2024-11-30T16:40:22.516Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:22.516Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:22.517Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo [none]
+[debug] [2024-11-30T16:40:23.175Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo 200
+[debug] [2024-11-30T16:40:23.175Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo {"name":"projects/malagon-ea242/billingInfo","projectId":"malagon-ea242","billingAccountName":"","billingEnabled":false}
+[info] i  dataconnect: ensuring required API sqladmin.googleapis.com is enabled... 
+[debug] [2024-11-30T16:40:23.177Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:23.178Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:23.178Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com [none]
+[debug] [2024-11-30T16:40:23.179Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:40:23.926Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com 200
+[debug] [2024-11-30T16:40:23.927Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com [omitted]
+[info] +  dataconnect: required API sqladmin.googleapis.com is enabled 
+[info] i  dataconnect\dataconnect.yaml is unchanged 
+[info] i  dataconnect\schema\schema.gql is unchanged 
+[info] +  Wrote dataconnect\connector\connector.yaml 
+[info] i  dataconnect\connector\queries.gql is unchanged 
+[info] i  dataconnect\connector\mutations.gql is unchanged 
+[info] +  Detected WEB app in directory C:\Users\EAN\Videos\Jair\malagon 
+[info] i  Wrote new config to C:\Users\EAN\Videos\Jair\malagon\dataconnect\connector/connector.yaml 
+[info] I1130 11:40:30.122722   26316 codegen.go:82] [connector "default" javascriptSdk] Generating sources into "C:\\Users\\EAN\\Videos\\Jair\\malagon\\dataconnect-generated\\js\\default-connector"
+I1130 11:40:30.309254   26316 generate.go:40] Generated all sources. Writing them to disk...
+I1130 11:40:30.313795   26316 collector.go:107] connector "default" javascriptSdk wrote into "C:\\Users\\EAN\\Videos\\Jair\\malagon\\dataconnect-generated\\js\\default-connector"
+Generated sources: esm\package.json [17B] index.cjs.js [221B] package.json [623B] index.d.ts [264B] esm\index.esm.js [180B] 
+I1130 11:40:30.359263   26316 installsdk.go:76] Running command: C:\Program Files\nodejs\npm.cmd install file:dataconnect-generated\js\default-connector
+
+[info] i  Generated SDK code for default 
+[info] +  If you'd like to add more generated SDKs to your app your later, run firebase init dataconnect:sdk again 
+[info] i  If you'd like to provision a CloudSQL Postgres instance on the Firebase Data Connect no-cost trial:
+1. Please upgrade to the pay-as-you-go (Blaze) billing plan. Visit the following page:
+     https://console.firebase.google.com/project/malagon-ea242/usage/details
+2. Run firebase init dataconnect again to configure the Cloud SQL instance.
+3. Run firebase deploy --only dataconnect to deploy your Data Connect service. 
+[info] 
+=== Firestore Setup
+[debug] [2024-11-30T16:40:37.473Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:37.474Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:37.475Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com [none]
+[debug] [2024-11-30T16:40:37.476Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:40:38.196Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com 200
+[debug] [2024-11-30T16:40:38.197Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com [omitted]
+[debug] [2024-11-30T16:40:38.198Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:38.199Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:38.199Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) [none]
+[debug] [2024-11-30T16:40:38.804Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) 200
+[debug] [2024-11-30T16:40:38.805Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) {"name":"projects/malagon-ea242/databases/(default)","uid":"67b94e98-fda7-4929-b252-0e7290f67e46","createTime":"2024-11-30T16:37:26.677779Z","updateTime":"2024-11-30T16:37:26.677779Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2024-11-30T16:37:26.677779Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","etag":"INW7zM2/hIoDMNTMnpe/hIoD"}
+[debug] [2024-11-30T16:40:38.806Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-11-30T16:40:38.806Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-11-30T16:40:38.807Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-11-30T16:40:38.808Z] > authorizing via signed-in user (jair.roa.calvo@gmail.com)
+[debug] [2024-11-30T16:40:38.808Z] [iam] checking project malagon-ea242 for permissions ["firebase.projects.get"]
+[debug] [2024-11-30T16:40:38.810Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:38.810Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:38.811Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions [none]
+[debug] [2024-11-30T16:40:38.812Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:40:38.813Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-11-30T16:40:39.310Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions 200
+[debug] [2024-11-30T16:40:39.310Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-11-30T16:40:44.215Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:44.216Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:44.216Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases pageSize=10&pageToken=
+[debug] [2024-11-30T16:40:44.428Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases 200
+[debug] [2024-11-30T16:40:44.429Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases {"releases":[{"name":"projects/malagon-ea242/releases/cloud.firestore","rulesetName":"projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e","createTime":"2024-11-30T16:37:29.068221Z","updateTime":"2024-11-30T16:37:29.068221Z"}]}
+[debug] [2024-11-30T16:40:44.429Z] Found ruleset: projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e
+[debug] [2024-11-30T16:40:44.430Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:44.431Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:40:44.431Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e [none]
+[debug] [2024-11-30T16:40:44.566Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e 200
+[debug] [2024-11-30T16:40:44.567Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e [omitted]
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-11-30T16:49:52.746Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:49:52.747Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:49:52.749Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:49:52.749Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:49:52.753Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2024-11-30T16:49:52.766Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2024-11-30T16:49:53.377Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2024-11-30T16:49:53.378Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/malagon-ea242/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[debug] [2024-11-30T16:49:53.380Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2024-11-30T16:49:53.380Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes {}
+[info] 
+=== Genkit Setup
+[debug] [2024-11-30T16:49:53.590Z] Error: spawnSync npm ENOENT
+    at Object.spawnSync (node:internal/child_process:1124:20)
+    at spawnSync (node:child_process:877:24)
+    at execFileSync (node:child_process:920:15)
+    at getGenkitVersion (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\features\genkit\index.js:29:58)
+    at doSetup (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\features\genkit\index.js:56:30)
+    at init (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\index.js:41:15)
+    at init (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\index.js:42:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2024-11-30T16:51:13.286Z] ----------------------------------------------------------------------
+[debug] [2024-11-30T16:51:13.291Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init --debug
+[debug] [2024-11-30T16:51:13.292Z] CLI Version:   13.27.0
+[debug] [2024-11-30T16:51:13.292Z] Platform:      win32
+[debug] [2024-11-30T16:51:13.292Z] Node Version:  v20.18.0
+[debug] [2024-11-30T16:51:13.293Z] Time:          Sat Nov 30 2024 11:51:13 GMT-0500 (hora estándar de Colombia)
+[debug] [2024-11-30T16:51:13.293Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-11-30T16:51:13.304Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-11-30T16:51:13.306Z] > authorizing via signed-in user (jair.roa.calvo@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\EAN\Videos\Jair\malagon
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-11-30T16:51:23.779Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:23.780Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:23.783Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2024-11-30T16:51:24.272Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2024-11-30T16:51:24.273Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project malagon-ea242 (Malagon) 
+[info] 
+=== Dataconnect Setup
+[debug] [2024-11-30T16:51:25.399Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:25.400Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:25.401Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo [none]
+[debug] [2024-11-30T16:51:25.822Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo 200
+[debug] [2024-11-30T16:51:25.823Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo {"name":"projects/malagon-ea242/billingInfo","projectId":"malagon-ea242","billingAccountName":"","billingEnabled":false}
+[info] i  dataconnect: ensuring required API sqladmin.googleapis.com is enabled... 
+[debug] [2024-11-30T16:51:25.824Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:25.824Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:25.825Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com [none]
+[debug] [2024-11-30T16:51:25.825Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:51:26.645Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com 200
+[debug] [2024-11-30T16:51:26.645Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com [omitted]
+[info] +  dataconnect: required API sqladmin.googleapis.com is enabled 
+[info] i  dataconnect\dataconnect.yaml is unchanged 
+[info] i  dataconnect\schema\schema.gql is unchanged 
+[info] +  Wrote dataconnect\connector\connector.yaml 
+[info] i  dataconnect\connector\queries.gql is unchanged 
+[info] i  dataconnect\connector\mutations.gql is unchanged 
+[info] +  Detected WEB app in directory C:\Users\EAN\Videos\Jair\malagon 
+[info] i  Wrote new config to C:\Users\EAN\Videos\Jair\malagon\dataconnect\connector/connector.yaml 
+[info] I1130 11:51:31.424190    7532 codegen.go:82] [connector "default" javascriptSdk] Generating sources into "C:\\Users\\EAN\\Videos\\Jair\\malagon\\dataconnect-generated\\js\\default-connector"
+I1130 11:51:31.615685    7532 generate.go:40] Generated all sources. Writing them to disk...
+I1130 11:51:31.623007    7532 collector.go:107] connector "default" javascriptSdk wrote into "C:\\Users\\EAN\\Videos\\Jair\\malagon\\dataconnect-generated\\js\\default-connector"
+Generated sources: index.d.ts [264B] esm\index.esm.js [180B] esm\package.json [17B] index.cjs.js [221B] package.json [623B] 
+I1130 11:51:31.674491    7532 installsdk.go:76] Running command: C:\Program Files\nodejs\npm.cmd install file:dataconnect-generated\js\default-connector
+
+[info] i  Generated SDK code for default 
+[info] +  If you'd like to add more generated SDKs to your app your later, run firebase init dataconnect:sdk again 
+[info] i  If you'd like to provision a CloudSQL Postgres instance on the Firebase Data Connect no-cost trial:
+1. Please upgrade to the pay-as-you-go (Blaze) billing plan. Visit the following page:
+     https://console.firebase.google.com/project/malagon-ea242/usage/details
+2. Run firebase init dataconnect again to configure the Cloud SQL instance.
+3. Run firebase deploy --only dataconnect to deploy your Data Connect service. 
+[info] 
+=== Firestore Setup
+[debug] [2024-11-30T16:51:38.526Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:38.527Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:38.527Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com [none]
+[debug] [2024-11-30T16:51:38.528Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:51:38.842Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com 200
+[debug] [2024-11-30T16:51:38.843Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com [omitted]
+[debug] [2024-11-30T16:51:38.843Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:38.844Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:38.844Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) [none]
+[debug] [2024-11-30T16:51:39.440Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) 200
+[debug] [2024-11-30T16:51:39.441Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) {"name":"projects/malagon-ea242/databases/(default)","uid":"67b94e98-fda7-4929-b252-0e7290f67e46","createTime":"2024-11-30T16:37:26.677779Z","updateTime":"2024-11-30T16:37:26.677779Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2024-11-30T16:37:26.677779Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","etag":"IOKfzojChIoDMNTMnpe/hIoD"}
+[debug] [2024-11-30T16:51:39.441Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-11-30T16:51:39.441Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-11-30T16:51:39.442Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-11-30T16:51:39.442Z] > authorizing via signed-in user (jair.roa.calvo@gmail.com)
+[debug] [2024-11-30T16:51:39.443Z] [iam] checking project malagon-ea242 for permissions ["firebase.projects.get"]
+[debug] [2024-11-30T16:51:39.443Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:39.444Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:39.445Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions [none]
+[debug] [2024-11-30T16:51:39.445Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:51:39.445Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-11-30T16:51:40.350Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions 200
+[debug] [2024-11-30T16:51:40.350Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-11-30T16:51:45.715Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:45.715Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:45.716Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases pageSize=10&pageToken=
+[debug] [2024-11-30T16:51:45.989Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases 200
+[debug] [2024-11-30T16:51:45.990Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases {"releases":[{"name":"projects/malagon-ea242/releases/cloud.firestore","rulesetName":"projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e","createTime":"2024-11-30T16:37:29.068221Z","updateTime":"2024-11-30T16:37:29.068221Z"}]}
+[debug] [2024-11-30T16:51:45.990Z] Found ruleset: projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e
+[debug] [2024-11-30T16:51:45.991Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:45.991Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:45.991Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e [none]
+[debug] [2024-11-30T16:51:46.131Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e 200
+[debug] [2024-11-30T16:51:46.132Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e [omitted]
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-11-30T16:51:49.450Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:49.451Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:49.451Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:49.452Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:51:49.452Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2024-11-30T16:51:49.456Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2024-11-30T16:51:50.052Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2024-11-30T16:51:50.052Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes {}
+[debug] [2024-11-30T16:51:50.069Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2024-11-30T16:51:50.069Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/malagon-ea242/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[info] 
+=== Genkit Setup
+[debug] [2024-11-30T16:51:50.235Z] Error: spawnSync npm ENOENT
+    at Object.spawnSync (node:internal/child_process:1124:20)
+    at spawnSync (node:child_process:877:24)
+    at execFileSync (node:child_process:920:15)
+    at getGenkitVersion (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\features\genkit\index.js:29:58)
+    at doSetup (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\features\genkit\index.js:56:30)
+    at init (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\index.js:41:15)
+    at init (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\index.js:42:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2024-11-30T16:56:01.244Z] ----------------------------------------------------------------------
+[debug] [2024-11-30T16:56:01.249Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2024-11-30T16:56:01.249Z] CLI Version:   13.27.0
+[debug] [2024-11-30T16:56:01.250Z] Platform:      win32
+[debug] [2024-11-30T16:56:01.250Z] Node Version:  v20.18.0
+[debug] [2024-11-30T16:56:01.250Z] Time:          Sat Nov 30 2024 11:56:01 GMT-0500 (hora estándar de Colombia)
+[debug] [2024-11-30T16:56:01.250Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-11-30T16:56:01.274Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-11-30T16:56:01.275Z] > authorizing via signed-in user (jair.roa.calvo@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\EAN\Videos\Jair\malagon
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-11-30T16:56:08.110Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:08.110Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:08.114Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2024-11-30T16:56:08.569Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2024-11-30T16:56:08.569Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project malagon-ea242 (Malagon) 
+[info] 
+=== Dataconnect Setup
+[debug] [2024-11-30T16:56:10.313Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:10.314Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:10.314Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo [none]
+[debug] [2024-11-30T16:56:10.676Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo 200
+[debug] [2024-11-30T16:56:10.676Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/malagon-ea242/billingInfo {"name":"projects/malagon-ea242/billingInfo","projectId":"malagon-ea242","billingAccountName":"","billingEnabled":false}
+[info] i  dataconnect: ensuring required API sqladmin.googleapis.com is enabled... 
+[debug] [2024-11-30T16:56:10.677Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:10.678Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:10.678Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com [none]
+[debug] [2024-11-30T16:56:10.678Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:56:11.392Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com 200
+[debug] [2024-11-30T16:56:11.392Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/sqladmin.googleapis.com [omitted]
+[info] +  dataconnect: required API sqladmin.googleapis.com is enabled 
+[info] i  dataconnect\dataconnect.yaml is unchanged 
+[info] i  dataconnect\schema\schema.gql is unchanged 
+[info] +  Wrote dataconnect\connector\connector.yaml 
+[info] i  dataconnect\connector\queries.gql is unchanged 
+[info] i  dataconnect\connector\mutations.gql is unchanged 
+[info] +  Detected WEB app in directory C:\Users\EAN\Videos\Jair\malagon 
+[info] i  Wrote new config to C:\Users\EAN\Videos\Jair\malagon\dataconnect\connector/connector.yaml 
+[info] I1130 11:56:15.558223   18932 codegen.go:82] [connector "default" javascriptSdk] Generating sources into "C:\\Users\\EAN\\Videos\\Jair\\malagon\\dataconnect-generated\\js\\default-connector"
+I1130 11:56:15.709010   18932 generate.go:40] Generated all sources. Writing them to disk...
+I1130 11:56:15.713560   18932 collector.go:107] connector "default" javascriptSdk wrote into "C:\\Users\\EAN\\Videos\\Jair\\malagon\\dataconnect-generated\\js\\default-connector"
+Generated sources: esm\package.json [17B] index.cjs.js [221B] package.json [623B] index.d.ts [264B] esm\index.esm.js [180B] 
+I1130 11:56:15.759217   18932 installsdk.go:76] Running command: C:\Program Files\nodejs\npm.cmd install file:dataconnect-generated\js\default-connector
+
+[info] i  Generated SDK code for default 
+[info] +  If you'd like to add more generated SDKs to your app your later, run firebase init dataconnect:sdk again 
+[info] i  If you'd like to provision a CloudSQL Postgres instance on the Firebase Data Connect no-cost trial:
+1. Please upgrade to the pay-as-you-go (Blaze) billing plan. Visit the following page:
+     https://console.firebase.google.com/project/malagon-ea242/usage/details
+2. Run firebase init dataconnect again to configure the Cloud SQL instance.
+3. Run firebase deploy --only dataconnect to deploy your Data Connect service. 
+[info] 
+=== Firestore Setup
+[debug] [2024-11-30T16:56:22.946Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:22.946Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:22.947Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com [none]
+[debug] [2024-11-30T16:56:22.947Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:56:23.276Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com 200
+[debug] [2024-11-30T16:56:23.276Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/malagon-ea242/services/firestore.googleapis.com [omitted]
+[debug] [2024-11-30T16:56:23.277Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:23.277Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:23.277Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) [none]
+[debug] [2024-11-30T16:56:23.972Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) 200
+[debug] [2024-11-30T16:56:23.972Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default) {"name":"projects/malagon-ea242/databases/(default)","uid":"67b94e98-fda7-4929-b252-0e7290f67e46","createTime":"2024-11-30T16:37:26.677779Z","updateTime":"2024-11-30T16:37:26.677779Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2024-11-30T16:37:26.677779Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","etag":"IPCZpJDDhIoDMNTMnpe/hIoD"}
+[debug] [2024-11-30T16:56:23.973Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-11-30T16:56:23.973Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-11-30T16:56:23.973Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-11-30T16:56:23.973Z] > authorizing via signed-in user (jair.roa.calvo@gmail.com)
+[debug] [2024-11-30T16:56:23.973Z] [iam] checking project malagon-ea242 for permissions ["firebase.projects.get"]
+[debug] [2024-11-30T16:56:23.974Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:23.974Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:23.975Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions [none]
+[debug] [2024-11-30T16:56:23.975Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions x-goog-quota-user=projects/malagon-ea242
+[debug] [2024-11-30T16:56:23.975Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-11-30T16:56:24.425Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions 200
+[debug] [2024-11-30T16:56:24.425Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/malagon-ea242:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-11-30T16:56:28.555Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:28.555Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:28.555Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases pageSize=10&pageToken=
+[debug] [2024-11-30T16:56:28.780Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases 200
+[debug] [2024-11-30T16:56:28.780Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/releases {"releases":[{"name":"projects/malagon-ea242/releases/cloud.firestore","rulesetName":"projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e","createTime":"2024-11-30T16:37:29.068221Z","updateTime":"2024-11-30T16:37:29.068221Z"}]}
+[debug] [2024-11-30T16:56:28.780Z] Found ruleset: projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e
+[debug] [2024-11-30T16:56:28.780Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:28.780Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:28.781Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e [none]
+[debug] [2024-11-30T16:56:28.912Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e 200
+[debug] [2024-11-30T16:56:28.912Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/malagon-ea242/rulesets/6c951e34-3837-4db1-ab4d-3409305f2a5e [omitted]
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-11-30T16:56:30.906Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:30.907Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:30.907Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:30.907Z] Checked if tokens are valid: true, expires at: 1732987716221
+[debug] [2024-11-30T16:56:30.908Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2024-11-30T16:56:30.911Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2024-11-30T16:56:31.518Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2024-11-30T16:56:31.518Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/indexes {}
+[debug] [2024-11-30T16:56:31.532Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2024-11-30T16:56:31.532Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/malagon-ea242/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/malagon-ea242/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[info] 
+=== Genkit Setup
+[debug] [2024-11-30T16:56:31.719Z] Error: spawnSync npm ENOENT
+    at Object.spawnSync (node:internal/child_process:1124:20)
+    at spawnSync (node:child_process:877:24)
+    at execFileSync (node:child_process:920:15)
+    at getGenkitVersion (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\features\genkit\index.js:29:58)
+    at doSetup (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\features\genkit\index.js:56:30)
+    at init (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\index.js:41:15)
+    at init (C:\Users\EAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\init\index.js:42:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[error] 
+[error] Error: An unexpected error has occurred.
