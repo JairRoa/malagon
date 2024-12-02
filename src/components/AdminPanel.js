@@ -1,31 +1,71 @@
-// AdminPanel.js
-import React from 'react';
-import { useNavigate } from 'react-router-dom';  // Importamos useNavigate para la redirección
-import { useAuth } from '../AuthContext'; // Importamos el contexto de autenticación
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 
 const AdminPanel = () => {
-  const { user, logout } = useAuth(); // Obtenemos el usuario y la función logout
-  const navigate = useNavigate(); // Función para navegar a otras rutas
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const handleAddUserClick = () => {
-    navigate('/add-user'); // Redirigir al formulario de agregar usuario
+  useEffect(() => {
+    const auth = getAuth();
+
+    // Escuchar cambios en el estado de autenticación
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser); // Establecer el usuario autenticado
+      } else {
+        navigate("/login"); // Redirigir al login si no está autenticado
+      }
+      setLoading(false); // Finalizar la carga
+    });
+
+    // Limpiar el listener al desmontar el componente
+    return () => unsubscribe();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth); // Cerrar sesión
+      navigate("/login"); // Redirigir al login
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
   };
 
+  const handleAddUserClick = () => {
+    navigate("/add-user"); // Redirigir a la página de agregar usuario
+  };
+
+  const handleEditUserClick = () => {
+    navigate("/edit-user"); // Redirigir a la página de editar usuario
+  };
+
+  if (loading) {
+    return <p>Cargando...</p>; // Mostrar un mensaje mientras se verifica el estado de autenticación
+  }
+
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h2>Panel de Administración</h2>
       {user ? (
         <div>
-          <p>Bienvenido, {user.username}!</p> {/* Aquí mostramos el nombre de usuario */}
-          <button onClick={logout}>Cerrar sesión</button>
-
+          <p>
+            Bienvenido, <strong>{user.displayName || user.email}</strong>!
+          </p>
+          <button onClick={handleLogout} style={{ marginBottom: "20px" }}>
+            Cerrar sesión
+          </button>
           <div>
-            {/* Botón para redirigir a la página de agregar usuario */}
-            <button onClick={handleAddUserClick}>Agregar Nuevo Usuario</button>
+            <button onClick={handleAddUserClick} style={{ marginRight: "10px" }}>
+              Agregar Nuevo Usuario
+            </button>
+            <button onClick={handleEditUserClick}>Editar Usuarios</button>
           </div>
         </div>
       ) : (
-        <p>No estás logueado</p>
+        <p>No estás logueado. Por favor inicia sesión.</p>
       )}
     </div>
   );
