@@ -1,154 +1,304 @@
-import React, { useState, useEffect } from "react";
-import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, setDoc, doc, getDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
-
-const auth = getAuth();
-const db = getFirestore();
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { db } from '../firebaseConfig'; // Asegúrate de importar tu configuración de Firebase
+import { collection, addDoc } from 'firebase/firestore'; // Métodos para agregar datos a Firestore
 
 const AddUser = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("usuario");
-  const [error, setError] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminUsername, setAdminUsername] = useState(""); // Para almacenar el nombre del admin logueado
-  const [loading, setLoading] = useState(true); // Estado de carga para la verificación
+  const [role, setRole] = useState('');  // Estado para el rol
+  const [constructionName, setConstructionName] = useState('');  // Nombre de la obra
+  const [email, setEmail] = useState(''); // Correo electrónico
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [manager, setManager] = useState('');
+  const [managerPhone, setManagerPhone] = useState('');
+  const [projectAddress, setProjectAddress] = useState('');
+  const [constructor, setConstructor] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [tentativeEndDate, setTentativeEndDate] = useState('');
+  const [assignedAuditor, setAssignedAuditor] = useState('');
+  const [auditorPhone, setAuditorPhone] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Verificar si ya hay un usuario logueado
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Si hay un usuario logueado, obtener el rol desde Firestore
-        const userRef = doc(db, "users", user.uid);
-        getDoc(userRef).then((docSnap) => {
-          if (docSnap.exists()) {
-            const userData = docSnap.data();
-            if (userData.role === "admin") {
-              // Si el usuario es admin, guardar el nombre y habilitar acceso
-              setAdminUsername(userData.username);
-              setIsAdmin(true);
-              setLoading(false);
-            } else {
-              // Si no es admin, mostrar error
-              setError("No tienes permisos para agregar usuarios.");
-              setIsAdmin(false);
-              setLoading(false);
-            }
-          } else {
-            // Si no encontramos datos del usuario
-            setError("Usuario no encontrado en la base de datos.");
-            setIsAdmin(false);
-            setLoading(false);
-          }
-        }).catch((error) => {
-          setError("Error al verificar el rol del usuario: " + error.message);
-          setIsAdmin(false);
-          setLoading(false);
-        });
-      } else {
-        // Si no hay usuario logueado, manejar la sesión
-        setError("No estás logueado.");
-        setIsAdmin(false);
-        setLoading(false);
-      }
-    });
+  const handleAddUser = async (e) => {
+    e.preventDefault();
 
-    return () => unsubscribe();
-  }, []); // El efecto solo se ejecuta una vez al cargar el componente
-
-  const handleAddUser = async () => {
-    if (loading) {
-      setError("Cargando..."); // Evitar que se ejecute mientras se cargan los datos
-      return;
-    }
-
-    if (!username.trim() || !password.trim()) {
-      setError("Por favor, ingresa un nombre de usuario y una contraseña.");
-      return;
-    }
-
-    if (!isAdmin) {
-      setError("No tienes permisos para agregar usuarios.");
+    // Validación de contraseñas
+    if (password !== confirmPassword) {
+      alert('Las contraseñas no coinciden. Por favor, verifique.');
       return;
     }
 
     try {
-      // Crear un correo electrónico único usando el nombre de usuario
-      let email = `${username.toLowerCase().replace(/\s+/g, "")}-${Date.now()}@example.com`; // Asegurar unicidad con timestamp
-      console.log("Email generado:", email); // Agregar log para verificar
+      const usersCollection = collection(db, 'users');
+      await addDoc(usersCollection, {
+        constructionName,  // Nombre de la obra
+        email,  // Correo electrónico
+        password,
+        manager,
+        managerPhone,
+        projectAddress,
+        constructor,
+        startDate,
+        tentativeEndDate,
+        assignedAuditor,
+        auditorPhone,
+        role,  // Guardar el rol del usuario
+      });
 
-      // Crear el usuario en Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      console.log('Usuario agregado a la base de datos:', {
+        constructionName,  // Nombre de la obra
+        email,  // Correo electrónico
+        password,
+        manager,
+        managerPhone,
+        projectAddress,
+        constructor,
+        startDate,
+        tentativeEndDate,
+        assignedAuditor,
+        auditorPhone,
+        role,  // Mostrar el rol
+      });
 
-      // Guardar el usuario en Firestore con el rol y el nombre de usuario
-      const userRef = doc(db, "users", user.uid); // Crear referencia al usuario
-      await setDoc(userRef, { username, role }); // Guardar los datos del nuevo usuario en Firestore
+      // Mantener el nombre del administrador
+      const adminName = localStorage.getItem('adminName');
+      localStorage.setItem('adminName', adminName);
 
-      // Si el rol del usuario creado es administrador, lo almacenamos en el localStorage
-      if (role === "admin") {
-        localStorage.setItem("adminUsername", username); // Guardar el nombre del admin
-      }
-
-      // Mostrar mensaje de éxito sin redirigir aún
-      alert("Usuario agregado con éxito");
-
-      // Redirigir al panel de administración
-      navigate("/admin"); // Redirigir sin cambiar el nombre de admin
-    } catch (err) {
-      console.error("Error al crear el usuario:", err);
-      if (err.code === "auth/email-already-in-use") {
-        setError("El correo electrónico ya está en uso. Por favor, elige otro nombre de usuario.");
-      } else {
-        setError("Error al agregar usuario: " + err.message);
-      }
+      // Redirigir al panel de administrador
+      navigate('/admin');
+    } catch (error) {
+      console.error('Error al agregar usuario:', error);
     }
-  };
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    setIsAdmin(false);
-    setAdminUsername("");
-    navigate("/login");
   };
 
   return (
     <div>
       <h2>Agregar Usuario</h2>
-      {isAdmin ? (
-        <>
-          <input
-            type="text"
-            placeholder="Nombre de usuario"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+      <form onSubmit={handleAddUser}>
+        {/* Selector de roles al principio */}
+        <div>
+          <label>Rol:</label>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
+            required
           >
-            <option value="usuario">Usuario</option>
+            <option value="">Seleccione un rol</option>
+            <option value="admin">Admin</option>
             <option value="auditor">Auditor</option>
-            <option value="admin">Administrador</option>
+            <option value="user">Usuario</option>
+            <option value="supplier">Proveedor</option>
           </select>
-          <button onClick={handleAddUser}>Agregar Usuario</button>
-        </>
-      ) : (
-        <p style={{ color: "red" }}>{error}</p>
-      )}
+        </div>
 
-      {/* Mostrar el nombre del admin logueado */}
-      {isAdmin && <h3>Bienvenido, {adminUsername}!</h3>}
+        {/* Campos comunes a todos los roles */}
+        {role && (
+          <>
+            {/* Campos que se muestran primero según el rol seleccionado */}
+            {role === 'admin' || role === 'auditor' ? (
+              <>
+                {/* Campos para Admin y Auditor */}
+                <div>
+                  <label>Nombre:</label>
+                  <input
+                    type="text"
+                    value={manager}
+                    onChange={(e) => setManager(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Teléfono:</label>
+                  <input
+                    type="number"
+                    value={managerPhone}
+                    onChange={(e) => setManagerPhone(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Correo electrónico:</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </>
+            ) : null}
 
-      <button onClick={handleLogout}>Cerrar sesión</button>
+            {role === 'user' && (
+              <>
+                {/* Campos para Usuario */}
+                <div>
+                  <label>Obra / Construcción:</label>
+                  <input
+                    type="text"
+                    value={constructionName}
+                    onChange={(e) => setConstructionName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Encargado:</label>
+                  <input
+                    type="text"
+                    value={manager}
+                    onChange={(e) => setManager(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Teléfono del Encargado:</label>
+                  <input
+                    type="number"
+                    value={managerPhone}
+                    onChange={(e) => setManagerPhone(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Dirección de la Obra:</label>
+                  <input
+                    type="text"
+                    value={projectAddress}
+                    onChange={(e) => setProjectAddress(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Constructora:</label>
+                  <input
+                    type="text"
+                    value={constructor}
+                    onChange={(e) => setConstructor(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Fecha de Inicio:</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Fecha Final Tentativa:</label>
+                  <input
+                    type="date"
+                    value={tentativeEndDate}
+                    onChange={(e) => setTentativeEndDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Auditor Asignado:</label>
+                  <input
+                    type="text"
+                    value={assignedAuditor}
+                    onChange={(e) => setAssignedAuditor(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Teléfono del Auditor:</label>
+                  <input
+                    type="number"
+                    value={auditorPhone}
+                    onChange={(e) => setAuditorPhone(e.target.value)}
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            {role === 'supplier' && (
+              <>
+                {/* Campos para Proveedor */}
+                <div>
+                  <label>Nombre:</label>
+                  <input
+                    type="text"
+                    value={constructionName}
+                    onChange={(e) => setConstructionName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Teléfono:</label>
+                  <input
+                    type="number"
+                    value={managerPhone}
+                    onChange={(e) => setManagerPhone(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Correo electrónico:</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Dirección:</label>
+                  <input
+                    type="text"
+                    value={projectAddress}
+                    onChange={(e) => setProjectAddress(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Auditor Asignado:</label>
+                  <input
+                    type="text"
+                    value={assignedAuditor}
+                    onChange={(e) => setAssignedAuditor(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Teléfono del Auditor:</label>
+                  <input
+                    type="number"
+                    value={auditorPhone}
+                    onChange={(e) => setAuditorPhone(e.target.value)}
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Campos de Contraseña y Repetir Contraseña, solo visibles después de elegir rol */}
+            <div>
+              <label>Contraseña:</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label>Repetir Contraseña:</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+          </>
+        )}
+
+        <button type="submit">Guardar Usuario</button>
+      </form>
     </div>
   );
 };
