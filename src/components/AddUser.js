@@ -12,71 +12,58 @@ const AddUser = () => {
   const [role, setRole] = useState("usuario");
   const [error, setError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminUsername, setAdminUsername] = useState(""); // Para mantener el nombre del admin logueado
+  const [adminUsername, setAdminUsername] = useState(""); // Para almacenar el nombre del admin logueado
   const [loading, setLoading] = useState(true); // Estado de carga para la verificación
   const navigate = useNavigate();
 
-  const TIMEOUT_LIMIT = 5 * 60 * 1000; // 5 minutos en milisegundos
-
   useEffect(() => {
-    // Verificar si hay un usuario logueado en el almacenamiento local
-    const savedAdmin = localStorage.getItem("adminUsername");
-    const savedLastActivityTime = localStorage.getItem("lastActivityTime");
-
-    // Si existe un usuario logueado, verificamos si no ha pasado más de 5 minutos
-    if (savedAdmin && savedLastActivityTime) {
-      const timeDiff = Date.now() - savedLastActivityTime;
-      if (timeDiff < TIMEOUT_LIMIT) {
-        setAdminUsername(savedAdmin); // Recuperar el nombre del admin
-        setIsAdmin(true); // El usuario sigue siendo administrador
-      } else {
-        localStorage.removeItem("adminUsername");
-        localStorage.removeItem("lastActivityTime");
-        signOut(auth); // Cerrar sesión si ha pasado el tiempo límite
-        setIsAdmin(false);
-        setError("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
-      }
-    }
-
+    // Verificar si ya hay un usuario logueado
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && !savedAdmin) {
-        // Si el usuario es administrador, almacenamos el nombre y el tiempo de la última actividad
+      if (user) {
+        // Si hay un usuario logueado, obtener el rol desde Firestore
         const userRef = doc(db, "users", user.uid);
-        getDoc(userRef)
-          .then((docSnap) => {
-            if (docSnap.exists()) {
-              const userData = docSnap.data();
-              if (userData.role === "admin") {
-                setAdminUsername(userData.username);
-                setIsAdmin(true);
-                localStorage.setItem("adminUsername", userData.username); // Guardar en localStorage
-                localStorage.setItem("lastActivityTime", Date.now().toString()); // Actualizar tiempo de actividad
-              } else {
-                setIsAdmin(false);
-                setError("No tienes permisos para agregar usuarios.");
-              }
+        getDoc(userRef).then((docSnap) => {
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            if (userData.role === "admin") {
+              // Si el usuario es admin, guardar el nombre y habilitar acceso
+              setAdminUsername(userData.username);
+              setIsAdmin(true);
+              setLoading(false);
             } else {
-              setError("Usuario no encontrado en la base de datos.");
+              // Si no es admin, mostrar error
+              setError("No tienes permisos para agregar usuarios.");
               setIsAdmin(false);
+              setLoading(false);
             }
-            setLoading(false);
-          })
-          .catch((error) => {
-            setError("Error al verificar el rol del usuario: " + error.message);
+          } else {
+            // Si no encontramos datos del usuario
+            setError("Usuario no encontrado en la base de datos.");
             setIsAdmin(false);
             setLoading(false);
-          });
+          }
+        }).catch((error) => {
+          setError("Error al verificar el rol del usuario: " + error.message);
+          setIsAdmin(false);
+          setLoading(false);
+        });
       } else {
-        setLoading(false);
+        // Si no hay usuario logueado, manejar la sesión
         setError("No estás logueado.");
         setIsAdmin(false);
+        setLoading(false);
       }
     });
 
     return () => unsubscribe();
-  }, [TIMEOUT_LIMIT]); // Aseguramos que TIMEOUT_LIMIT esté en la lista de dependencias
+  }, []); // El efecto solo se ejecuta una vez al cargar el componente
 
   const handleAddUser = async () => {
+    if (loading) {
+      setError("Cargando..."); // Evitar que se ejecute mientras se cargan los datos
+      return;
+    }
+
     if (!username.trim() || !password.trim()) {
       setError("Por favor, ingresa un nombre de usuario y una contraseña.");
       return;
@@ -90,22 +77,28 @@ const AddUser = () => {
     try {
       // Crear un correo electrónico único usando el nombre de usuario
       let email = `${username.toLowerCase().replace(/\s+/g, "")}-${Date.now()}@example.com`; // Asegurar unicidad con timestamp
+      console.log("Email generado:", email); // Agregar log para verificar
 
       // Crear el usuario en Firebase Authentication
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-      // Obtener el usuario autenticado
-      const user = auth.currentUser;
+      // Guardar el usuario en Firestore con el rol y el nombre de usuario
       const userRef = doc(db, "users", user.uid); // Crear referencia al usuario
       await setDoc(userRef, { username, role }); // Guardar los datos del nuevo usuario en Firestore
 
-      // Redirigir al panel de administración con el nombre del admin
-      alert("Usuario agregado con éxito");
-      navigate("/admin"); // Redirigir al panel de administración
+      // Si el rol del usuario creado es administrador, lo almacenamos en el localStorage
+      if (role === "admin") {
+        localStorage.setItem("adminUsername", username); // Guardar el nombre del admin
+      }
 
-      // Actualizamos la última actividad al agregar un usuario
-      localStorage.setItem("lastActivityTime", Date.now().toString());
+      // Mostrar mensaje de éxito sin redirigir aún
+      alert("Usuario agregado con éxito");
+
+      // Redirigir al panel de administración
+      navigate("/admin"); // Redirigir sin cambiar el nombre de admin
     } catch (err) {
+      console.error("Error al crear el usuario:", err);
       if (err.code === "auth/email-already-in-use") {
         setError("El correo electrónico ya está en uso. Por favor, elige otro nombre de usuario.");
       } else {
@@ -116,15 +109,10 @@ const AddUser = () => {
 
   const handleLogout = async () => {
     await signOut(auth);
-    localStorage.removeItem("adminUsername");
-    localStorage.removeItem("lastActivityTime");
     setIsAdmin(false);
+    setAdminUsername("");
     navigate("/login");
   };
-
-  if (loading) {
-    return <p>Cargando...</p>; // Mostrar mensaje de carga mientras verificamos los permisos
-  }
 
   return (
     <div>

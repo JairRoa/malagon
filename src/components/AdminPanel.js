@@ -1,6 +1,9 @@
+// src/components/AdminPanel.js
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../firebaseConfig"; // Ajusta la ruta si el archivo firebaseConfig.js está en otro directorio
 
 const AdminPanel = () => {
   const [user, setUser] = useState(null);
@@ -8,42 +11,38 @@ const AdminPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const auth = getAuth();
-
-    // Escuchar cambios en el estado de autenticación
+    // Verificar el estado de autenticación
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        setUser(currentUser); // Establecer el usuario autenticado
+        setUser(currentUser); // Si hay un usuario autenticado
       } else {
-        navigate("/login"); // Redirigir al login si no está autenticado
+        navigate("/login"); // Si no hay usuario, redirigir al login
       }
-      setLoading(false); // Finalizar la carga
+      setLoading(false); // Finalizar carga
     });
 
-    // Limpiar el listener al desmontar el componente
-    return () => unsubscribe();
+    return () => unsubscribe(); // Limpiar el listener
   }, [navigate]);
 
   const handleLogout = async () => {
-    const auth = getAuth();
     try {
       await signOut(auth); // Cerrar sesión
-      navigate("/login"); // Redirigir al login
+      navigate("/login"); // Redirigir a login
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
   };
 
   const handleAddUserClick = () => {
-    navigate("/add-user"); // Redirigir a la página de agregar usuario
+    navigate("/add-user"); // Redirigir para agregar usuario
   };
 
   const handleEditUserClick = () => {
-    navigate("/edit-user"); // Redirigir a la página de editar usuario
+    navigate("/edit-user"); // Redirigir para editar usuario
   };
 
   if (loading) {
-    return <p>Cargando...</p>; // Mostrar un mensaje mientras se verifica el estado de autenticación
+    return <p>Cargando...</p>; // Mostrar cargando mientras verificamos el estado de autenticación
   }
 
   return (
@@ -72,4 +71,3 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
-
