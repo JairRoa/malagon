@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom/client";  // Cambia esta línea
+import ReactDOM from "react-dom/client"; // Cambié esta línea
 import { BrowserRouter } from "react-router-dom"; // Importa BrowserRouter
 import { AuthProvider } from "./AuthContext"; // Importa el proveedor del contexto de autenticación
 import App from "./App";

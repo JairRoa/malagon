@@ -1,38 +1,35 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore"; // Importar Firestore
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // Para mostrar los errores
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-  const db = getFirestore(); // Instancia de Firestore
+  const db = getFirestore();
 
   const handleLogin = async () => {
-    const auth = getAuth(); // Objeto de autenticación de Firebase
-
+    const auth = getAuth();
     if (!username.trim()) {
       setError("Por favor ingrese un nombre de usuario.");
       return;
     }
 
-    const email = `${username.trim()}@malagonsaavedra.com`; // Formatear como email válido
-    console.log("Intentando iniciar sesión con email:", email);
+    const email = `${username.trim()}@malagonsaavedra.com`;
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      console.log("Usuario autenticado:", user);
 
-      // Buscar datos del usuario en Firestore
-      const userDocRef = doc(db, "users", user.uid); // Documento con UID del usuario
+      // Obtener el documento del usuario en Firestore
+      const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        const role = userData.role; // Suponiendo que el rol está en el campo 'role'
+        const role = userData.role;
 
         // Redirigir según el rol
         if (role === "admin") {
@@ -48,18 +45,15 @@ const Login = () => {
         setError("Usuario no encontrado en la base de datos.");
       }
     } catch (error) {
-      const errorCode = error.code;
+      console.error("Error al iniciar sesión:", error);
       let errorMessage = "Error al iniciar sesión.";
-
-      if (errorCode === "auth/user-not-found") {
+      if (error.code === "auth/user-not-found") {
         errorMessage = "Usuario no encontrado. Verifica tu nombre de usuario.";
-      } else if (errorCode === "auth/wrong-password") {
+      } else if (error.code === "auth/wrong-password") {
         errorMessage = "Contraseña incorrecta. Intenta de nuevo.";
-      } else if (errorCode === "auth/invalid-email") {
+      } else if (error.code === "auth/invalid-email") {
         errorMessage = "Formato de usuario inválido.";
       }
-
-      console.error("Error al iniciar sesión:", error);
       setError(errorMessage);
     }
   };
@@ -80,7 +74,7 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button onClick={handleLogin}>Iniciar sesión</button>
-      {error && <p style={{ color: "red" }}>{error}</p>} {/* Mostrar error si ocurre */}
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };
