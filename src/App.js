@@ -7,6 +7,7 @@ import AuditorDashboard from "./components/AuditorDashboard";
 import AddBuilding from "./components/AddBuilding";
 import AddUser from "./components/AddUser";
 import EditUser from "./components/EditUser";
+import ViewUser from "./components/ViewUser";  // Importa ViewUser
 import AddDataForm from "./components/AddDataForm";
 import UpdateData from "./components/UpdateData";
 import TestFirestore from "./components/TestFirestore";
@@ -18,7 +19,6 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Observar cambios de autenticación
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAuthenticated(!!user);
       setLoading(false);
@@ -36,11 +36,12 @@ const App = () => {
       <Route path="/admin" element={isAuthenticated ? <AdminPanel /> : <Navigate to="/" />} />
       <Route path="/user" element={isAuthenticated ? <UserDashboard /> : <Navigate to="/" />} />
       <Route path="/auditor" element={isAuthenticated ? <AuditorDashboard /> : <Navigate to="/" />} />
-
+      
       {/* Rutas adicionales protegidas */}
       <Route path="/add-building" element={isAuthenticated ? <AddBuilding /> : <Navigate to="/" />} />
       <Route path="/add-user" element={isAuthenticated ? <AddUser /> : <Navigate to="/" />} />
       <Route path="/edit-user/:userId" element={isAuthenticated ? <EditUser /> : <Navigate to="/" />} />
+      <Route path="/view-user/:userId" element={isAuthenticated ? <ViewUser /> : <Navigate to="/" />} />  {/* Ruta para ver el usuario */}
       <Route path="/add-data" element={isAuthenticated ? <AddDataForm /> : <Navigate to="/" />} />
       <Route path="/update-data/:docId" element={isAuthenticated ? <UpdateData /> : <Navigate to="/" />} />
       <Route path="/test-firestore" element={isAuthenticated ? <TestFirestore /> : <Navigate to="/" />} />

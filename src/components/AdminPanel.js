@@ -1,225 +1,187 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth, db } from "../firebaseConfig";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"; // Importar 'deleteDoc' y 'doc'
+import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { signOut } from "firebase/auth";
+import { db, auth } from "../firebaseConfig";
 
 const AdminPanel = () => {
-  const [user, setUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]); // Usado para listar usuarios
+  const [currentUser, setCurrentUser] = useState(null); // Nuevo estado para almacenar el usuario logueado
   const navigate = useNavigate();
 
+  // Función para obtener la lista de usuarios
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        fetchUsers();
-      } else {
-        navigate("/login");
+    const fetchUsers = async () => {
+      try {
+        const usersCollection = collection(db, "users");
+        const snapshot = await getDocs(usersCollection);
+        const usersList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setUsers(usersList);
+      } catch (error) {
+        console.error("Error al obtener usuarios:", error.message);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
-  }, [navigate]);
+    fetchUsers();
 
-  const fetchUsers = async () => {
-    try {
-      const usersCollection = collection(db, "users");
-      const snapshot = await getDocs(usersCollection);
-      const userList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUsers(userList);
-    } catch (error) {
-      console.error("Error al cargar usuarios:", error.message);
+    // Obtener el usuario logueado
+    const user = auth.currentUser;
+    if (user) {
+      setCurrentUser(user.displayName || user.email); // Usa displayName o email si no tienes displayName
+    }
+  }, []);
+
+  // Función para manejar la navegación al componente AddUser
+  const handleAddUser = () => {
+    navigate("/add-user");
+  };
+
+  // Función para manejar la navegación al componente EditUser
+  const handleModifyUser = (userId) => {
+    navigate(`/edit-user/${userId}`);
+  };
+
+  // Función para manejar la navegación al componente ViewUser
+  const handleViewUser = (userId) => {
+    navigate(`/view-user/${userId}`);
+  };
+
+  // Función para eliminar un usuario
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
+      try {
+        await deleteDoc(doc(db, "users", userId));
+        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+        alert("Usuario eliminado exitosamente.");
+      } catch (error) {
+        console.error("Error al eliminar usuario:", error.message);
+        alert("Error al eliminar el usuario.");
+      }
     }
   };
 
+  // Función para cerrar sesión
   const handleLogout = async () => {
     try {
       await signOut(auth);
       navigate("/");
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.error("Error al cerrar sesión:", error.message);
+      alert("No se pudo cerrar la sesión. Inténtalo nuevamente.");
     }
-  };
-
-  const handleDeleteUser = async (userId) => {
-    const adminPassword = window.prompt(
-      "Por favor, confirma la eliminación del usuario ingresando tu contraseña de administrador:",
-      ""
-    );
-
-    if (!adminPassword) {
-      alert("La contraseña es obligatoria para eliminar un usuario.");
-      return;
-    }
-
-    try {
-      if (adminPassword === "admin_password") {
-        // Elimina el usuario de Firestore
-        const userDocRef = doc(db, "users", userId);
-        await deleteDoc(userDocRef);
-        alert("Usuario eliminado con éxito.");
-        fetchUsers(); // Actualiza la lista de usuarios
-      } else {
-        alert("Contraseña incorrecta. No se puede eliminar al usuario.");
-      }
-    } catch (error) {
-      console.error("Error al eliminar usuario:", error.message);
-    }
-  };
-
-  const handleViewUser = (userId) => {
-    // Lógica para ver los detalles del usuario
-    alert(`Ver detalles del usuario con ID: ${userId}`);
-  };
-
-  const handleModifyUser = (userId) => {
-    // Lógica para modificar los detalles del usuario
-    alert(`Modificar detalles del usuario con ID: ${userId}`);
-  };
-
-  const handleAddUser = () => {
-    // Redirige al formulario de agregar nuevo usuario
-    navigate("/add-user");
   };
 
   if (loading) {
-    return <p>Cargando...</p>;
+    return <p>Cargando usuarios...</p>;
   }
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Panel de Administración</h2>
-      {user ? (
-        <div>
-          <p>
-            Bienvenido, <strong>{user.displayName || user.email}</strong>!
-          </p>
-          <button onClick={handleLogout} style={{ marginBottom: "20px" }}>
-            Cerrar sesión
-          </button>
-
-          {/* Botón para agregar nuevo usuario */}
-          <button
-            onClick={handleAddUser}
-            style={{
-              padding: "10px 20px",
-              backgroundColor: "#4CAF50",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              borderRadius: "5px",
-              marginBottom: "20px",
-            }}
-          >
-            Agregar Nuevo Usuario
-          </button>
-
-          <h3>Lista de Usuarios</h3>
-          {users.length > 0 ? (
-            <table
-              border="1"
-              cellPadding="10"
-              style={{
-                width: "100%",
-                marginTop: "20px",
-                borderCollapse: "collapse",
-                border: "1px solid #ddd",
-              }}
-            >
-              <thead>
-                <tr style={{ backgroundColor: "#f2f2f2" }}>
-                  <th style={{ textAlign: "left", padding: "10px" }}>Nombre</th>
-                  <th style={{ textAlign: "left", padding: "10px" }}>Encargado</th>
-                  <th style={{ textAlign: "left", padding: "10px" }}>Teléfono</th>
-                  <th style={{ textAlign: "left", padding: "10px" }}>Rol</th>
-                  <th style={{ textAlign: "left", padding: "10px" }}>Correo</th>
-                  <th style={{ textAlign: "center", padding: "10px" }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    {/* Nombre Condicional según el rol */}
-                    <td style={{ padding: "8px", textAlign: "left" }}>
-                      {user.role === "usuario"
-                        ? user.constructionName
-                        : user.manager}
-                    </td>
-                    {/* Encargado Condicional según el rol */}
-                    <td style={{ padding: "8px", textAlign: "left" }}>
-                      {user.role === "usuario" ? user.manager : "N/A"}
-                    </td>
-                    {/* Teléfono: para todos los roles se muestra managerPhone */}
-                    <td style={{ padding: "8px", textAlign: "left" }}>
-                      {user.managerPhone}
-                    </td>
-                    <td style={{ padding: "8px", textAlign: "left" }}>
-                      {user.role}
-                    </td>
-                    <td style={{ padding: "8px", textAlign: "left" }}>
-                      {user.email}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
-                      <button
-                        onClick={() => handleViewUser(user.id)}
-                        style={{
-                          padding: "5px 10px",
-                          backgroundColor: "#4CAF50",
-                          color: "#fff",
-                          border: "none",
-                          cursor: "pointer",
-                          borderRadius: "5px",
-                          margin: "5px",
-                        }}
-                      >
-                        Ver
-                      </button>
-                      <button
-                        onClick={() => handleModifyUser(user.id)}
-                        style={{
-                          padding: "5px 10px",
-                          backgroundColor: "#2196F3",
-                          color: "#fff",
-                          border: "none",
-                          cursor: "pointer",
-                          borderRadius: "5px",
-                          margin: "5px",
-                        }}
-                      >
-                        Modificar
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        style={{
-                          padding: "5px 10px",
-                          backgroundColor: "#f44336",
-                          color: "#fff",
-                          border: "none",
-                          cursor: "pointer",
-                          borderRadius: "5px",
-                          margin: "5px",
-                        }}
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>No se encontraron usuarios.</p>
-          )}
-        </div>
-      ) : (
-        <p>No estás logueado. Por favor inicia sesión.</p>
-      )}
+      <h1>Bienvenido {currentUser || "Usuario"}</h1> {/* Mostrar el nombre del usuario logueado */}
+      <div style={{ marginBottom: "20px" }}>
+        <button
+          onClick={handleAddUser}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#4CAF50",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            borderRadius: "5px",
+            marginRight: "10px",
+          }}
+        >
+          Agregar Usuario
+        </button>
+        <button
+          onClick={handleLogout}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#f44336",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            borderRadius: "5px",
+          }}
+        >
+          Cerrar Sesión
+        </button>
+      </div>
+      <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px" }}>
+        <thead>
+          <tr style={{ backgroundColor: "#f2f2f2" }}>
+            <th style={{ border: "1px solid #ddd", padding: "8px" }}>Nombre</th>
+            <th style={{ border: "1px solid #ddd", padding: "8px" }}>Encargado</th>
+            <th style={{ border: "1px solid #ddd", padding: "8px" }}>Teléfono</th>
+            <th style={{ border: "1px solid #ddd", padding: "8px" }}>Rol</th>
+            <th style={{ border: "1px solid #ddd", padding: "8px" }}>Correo</th>
+            <th style={{ border: "1px solid #ddd", padding: "8px" }}>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id} style={{ textAlign: "center" }}>
+              <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                {user.role === "supplier" || user.role === "user" ? user.constructionName : user.manager}
+              </td>
+              <td style={{ border: "1px solid #ddd", padding: "8px" }}>{user.manager}</td>
+              <td style={{ border: "1px solid #ddd", padding: "8px" }}>{user.managerPhone}</td>
+              <td style={{ border: "1px solid #ddd", padding: "8px" }}>{user.role}</td>
+              <td style={{ border: "1px solid #ddd", padding: "8px" }}>{user.email}</td>
+              <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                <button
+                  onClick={() => handleViewUser(user.id)}
+                  style={{
+                    padding: "5px 10px",
+                    backgroundColor: "#008CBA",
+                    color: "#fff",
+                    border: "none",
+                    cursor: "pointer",
+                    borderRadius: "5px",
+                    margin: "5px",
+                  }}
+                >
+                  Ver
+                </button>
+                <button
+                  onClick={() => handleModifyUser(user.id)}
+                  style={{
+                    padding: "5px 10px",
+                    backgroundColor: "#2196F3",
+                    color: "#fff",
+                    border: "none",
+                    cursor: "pointer",
+                    borderRadius: "5px",
+                    margin: "5px",
+                  }}
+                >
+                  Modificar
+                </button>
+                <button
+                  onClick={() => handleDeleteUser(user.id)}
+                  style={{
+                    padding: "5px 10px",
+                    backgroundColor: "#f44336",
+                    color: "#fff",
+                    border: "none",
+                    cursor: "pointer",
+                    borderRadius: "5px",
+                    margin: "5px",
+                  }}
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
