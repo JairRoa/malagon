@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../firebaseConfig'; // Asegúrate de importar tu configuración de Firebase
-import { collection, addDoc } from 'firebase/firestore'; // Métodos para agregar datos a Firestore
+import { db, auth } from '../firebaseConfig';  // Asegúrate de importar tu configuración de Firebase
+import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 const AddUser = () => {
-  const [role, setRole] = useState('');  // Estado para el rol
-  const [constructionName, setConstructionName] = useState('');  // Nombre de la obra
-  const [email, setEmail] = useState(''); // Correo electrónico
+  const [role, setRole] = useState('');
+  const [constructionName, setConstructionName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [manager, setManager] = useState('');
@@ -17,22 +18,29 @@ const AddUser = () => {
   const [tentativeEndDate, setTentativeEndDate] = useState('');
   const [assignedAuditor, setAssignedAuditor] = useState('');
   const [auditorPhone, setAuditorPhone] = useState('');
+
   const navigate = useNavigate();
 
   const handleAddUser = async (e) => {
     e.preventDefault();
 
-    // Validación de contraseñas
     if (password !== confirmPassword) {
       alert('Las contraseñas no coinciden. Por favor, verifique.');
       return;
     }
 
     try {
+      // **Crear el usuario en Firebase Authentication**
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
+
+      console.log('UID del usuario:', uid);
+
+      // **Guardar datos del usuario en Firestore**
       const usersCollection = collection(db, 'users');
-      await addDoc(usersCollection, {
-        constructionName,  // Nombre de la obra
-        email,  // Correo electrónico
+      await setDoc(doc(usersCollection, uid), {
+        constructionName,
+        email,
         password,
         manager,
         managerPhone,
@@ -42,32 +50,20 @@ const AddUser = () => {
         tentativeEndDate,
         assignedAuditor,
         auditorPhone,
-        role,  // Guardar el rol del usuario
+        role,
       });
 
-      console.log('Usuario agregado a la base de datos:', {
-        constructionName,  // Nombre de la obra
-        email,  // Correo electrónico
-        password,
-        manager,
-        managerPhone,
-        projectAddress,
-        constructor,
-        startDate,
-        tentativeEndDate,
-        assignedAuditor,
-        auditorPhone,
-        role,  // Mostrar el rol
-      });
+      console.log('Usuario agregado a Firestore con UID:', uid);
 
-      // Mantener el nombre del administrador
+      // Mantener el nombre del administrador en Local Storage
       const adminName = localStorage.getItem('adminName');
       localStorage.setItem('adminName', adminName);
 
-      // Redirigir al panel de administrador
+      // Redirigir al panel del administrador después de agregar el usuario
       navigate('/admin');
     } catch (error) {
-      console.error('Error al agregar usuario:', error);
+      console.error('Error al agregar usuario:', error.message);
+      alert(`Error al agregar usuario: ${error.message}`);
     }
   };
 
@@ -75,225 +71,93 @@ const AddUser = () => {
     <div>
       <h2>Agregar Usuario</h2>
       <form onSubmit={handleAddUser}>
-        {/* Selector de roles al principio */}
-        <div>
-          <label>Rol:</label>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            required
-          >
-            <option value="">Seleccione un rol</option>
-            <option value="admin">Admin</option>
-            <option value="auditor">Auditor</option>
-            <option value="user">Usuario</option>
-            <option value="supplier">Proveedor</option>
-          </select>
-        </div>
+        {/* Selección del rol */}
+        <label>Rol:</label>
+        <select value={role} onChange={(e) => setRole(e.target.value)} required>
+          <option value="">Seleccione un rol</option>
+          <option value="admin">Admin</option>
+          <option value="auditor">Auditor</option>
+          <option value="user">Usuario</option>
+          <option value="supplier">Proveedor</option>
+        </select>
 
-        {/* Campos comunes a todos los roles */}
+        {/* Campos según el rol seleccionado */}
         {role && (
           <>
-            {/* Campos que se muestran primero según el rol seleccionado */}
             {role === 'admin' || role === 'auditor' ? (
               <>
-                {/* Campos para Admin y Auditor */}
-                <div>
-                  <label>Nombre:</label>
-                  <input
-                    type="text"
-                    value={manager}
-                    onChange={(e) => setManager(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Teléfono:</label>
-                  <input
-                    type="number"
-                    value={managerPhone}
-                    onChange={(e) => setManagerPhone(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Correo electrónico:</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
+                <label>Nombre</label>
+                <input
+                  type="text"
+                  value={manager}
+                  onChange={(e) => setManager(e.target.value)}
+                  required
+                />
+                <label>Teléfono</label>
+                <input
+                  type="number"
+                  value={managerPhone}
+                  onChange={(e) => setManagerPhone(e.target.value)}
+                  required
+                />
+                <label>Correo electrónico</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </>
             ) : null}
 
             {role === 'user' && (
               <>
-                {/* Campos para Usuario */}
-                <div>
-                  <label>Obra / Construcción:</label>
-                  <input
-                    type="text"
-                    value={constructionName}
-                    onChange={(e) => setConstructionName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Encargado:</label>
-                  <input
-                    type="text"
-                    value={manager}
-                    onChange={(e) => setManager(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Teléfono del Encargado:</label>
-                  <input
-                    type="number"
-                    value={managerPhone}
-                    onChange={(e) => setManagerPhone(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Dirección de la Obra:</label>
-                  <input
-                    type="text"
-                    value={projectAddress}
-                    onChange={(e) => setProjectAddress(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Constructora:</label>
-                  <input
-                    type="text"
-                    value={constructor}
-                    onChange={(e) => setConstructor(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Fecha de Inicio:</label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Fecha Final Tentativa:</label>
-                  <input
-                    type="date"
-                    value={tentativeEndDate}
-                    onChange={(e) => setTentativeEndDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Auditor Asignado:</label>
-                  <input
-                    type="text"
-                    value={assignedAuditor}
-                    onChange={(e) => setAssignedAuditor(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Teléfono del Auditor:</label>
-                  <input
-                    type="number"
-                    value={auditorPhone}
-                    onChange={(e) => setAuditorPhone(e.target.value)}
-                    required
-                  />
-                </div>
+                <label>Nombre de la Construcción</label>
+                <input
+                  type="text"
+                  value={constructionName}
+                  onChange={(e) => setConstructionName(e.target.value)}
+                  required
+                />
+                <label>Encargado</label>
+                <input
+                  type="text"
+                  value={manager}
+                  onChange={(e) => setManager(e.target.value)}
+                  required
+                />
+                <label>Teléfono del Encargado</label>
+                <input
+                  type="number"
+                  value={managerPhone}
+                  onChange={(e) => setManagerPhone(e.target.value)}
+                  required
+                />
+                <label>Dirección de la Obra</label>
+                <input
+                  type="text"
+                  value={projectAddress}
+                  onChange={(e) => setProjectAddress(e.target.value)}
+                  required
+                />
               </>
             )}
 
-            {role === 'supplier' && (
-              <>
-                {/* Campos para Proveedor */}
-                <div>
-                  <label>Nombre:</label>
-                  <input
-                    type="text"
-                    value={constructionName}
-                    onChange={(e) => setConstructionName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Teléfono:</label>
-                  <input
-                    type="number"
-                    value={managerPhone}
-                    onChange={(e) => setManagerPhone(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Correo electrónico:</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Dirección:</label>
-                  <input
-                    type="text"
-                    value={projectAddress}
-                    onChange={(e) => setProjectAddress(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Auditor Asignado:</label>
-                  <input
-                    type="text"
-                    value={assignedAuditor}
-                    onChange={(e) => setAssignedAuditor(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Teléfono del Auditor:</label>
-                  <input
-                    type="number"
-                    value={auditorPhone}
-                    onChange={(e) => setAuditorPhone(e.target.value)}
-                    required
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Campos de Contraseña y Repetir Contraseña, solo visibles después de elegir rol */}
-            <div>
-              <label>Contraseña:</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label>Repetir Contraseña:</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
+            {/* Campos para contraseña */}
+            <label>Contraseña</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <label>Repetir Contraseña</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
           </>
         )}
 
