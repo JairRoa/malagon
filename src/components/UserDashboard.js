@@ -1,204 +1,165 @@
-import React, { useState } from "react";
-import { db } from "../firebaseConfig";
-import { ref, push } from "firebase/database"; // Eliminado onValue
+import React, { useState, useEffect, useMemo } from "react";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getApp } from "firebase/app";
 
-const UserDashboard = ({ loggedInUser }) => {
-  const [form, setForm] = useState({
-    requestDate: new Date().toISOString().split("T")[0], // Fecha automática
-    constructionName: loggedInUser?.constructionName || "", // Nombre de la obra
-    material: "",
-    quantity: "",
-    unit: "unidad",
-    manager: loggedInUser?.manager || "", // Encargado
-    managerPhone: loggedInUser?.managerPhone || "", // Teléfono
-    supplier: "",
-    quotation: null, // Documento adjunto
-  });
+const db = getFirestore(getApp());
 
+const UserDashboard = ({ loggedInUser, onLogout }) => {
+  const initialFormState = useMemo(
+    () => ({
+      requestDate: new Date().toLocaleDateString(),
+      constructionName: "",
+      material: "",
+      quantity: "",
+      unit: "unidad",
+      manager: "",
+      managerPhone: "",
+      supplier: "",
+      quotation: null,
+      projectAddress: "",
+    }),
+    []
+  );
+
+  const [forms, setForms] = useState([initialFormState]);
   const [loading, setLoading] = useState(false);
 
-  // Manejar cambios en los campos del formulario
-  const handleChange = (e) => {
+  useEffect(() => {
+    if (loggedInUser) {
+      setForms([
+        {
+          ...initialFormState,
+          constructionName: loggedInUser.constructionName || "",
+          manager: loggedInUser.manager || "",
+          managerPhone: loggedInUser.managerPhone || "",
+          projectAddress: loggedInUser.projectAddress,
+        }
+      ]);
+    }
+  }, [loggedInUser, initialFormState]);
+
+  const handleChange = (index, e) => {
     const { name, value } = e.target;
-    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+    const updatedForms = [...forms];
+    updatedForms[index][name] = value;
+    setForms(updatedForms);
   };
 
-  // Manejar cambios en el archivo adjunto
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file && !["application/pdf", "image/png", "image/jpeg"].includes(file.type)) {
-      alert("Solo se permiten archivos en formato PDF, PNG o JPG.");
-      e.target.value = null; // Resetea el campo de archivo
-      return;
-    }
-    setForm((prevForm) => ({ ...prevForm, quotation: file }));
+  const handleAddMaterial = () => {
+    setForms([...forms, { material: "", quantity: "", unit: "unidad" }]);
   };
 
-  // Manejar envío del formulario
-  const handleSubmit = () => {
-    if (!form.material.trim() || !form.quantity || !form.unit) {
-      alert("Por favor, completa todos los campos requeridos.");
-      return;
-    }
+  const handleRemoveMaterial = (index) => {
+    const updatedForms = forms.filter((_, idx) => idx !== index);
+    setForms(updatedForms);
+  };
 
+  const handleSubmit = async () => {
     setLoading(true);
+    try {
+      const requestDate = new Date().toLocaleDateString();
+      const materials = forms.map((form) => ({
+        material: form.material,
+        quantity: form.quantity,
+        unit: form.unit,
+        supplier: form.supplier,
+        quotation: form.quotation ? form.quotation.name : null,
+      }));
 
-    const purchasesRef = ref(db, "purchases");
-    const newPurchase = {
-      ...form,
-      quotation: form.quotation ? form.quotation.name : null, // Guardar solo el nombre del archivo
-    };
+      const docRef = doc(db, "purchases", `request_${requestDate}`);
 
-    push(purchasesRef, newPurchase)
-      .then(() => {
-        alert("Solicitud enviada exitosamente.");
-        setForm({
-          requestDate: new Date().toISOString().split("T")[0],
-          constructionName: loggedInUser?.constructionName || "",
-          material: "",
-          quantity: "",
-          unit: "unidad",
-          manager: loggedInUser?.manager || "",
-          managerPhone: loggedInUser?.managerPhone || "",
-          supplier: "",
-          quotation: null,
-        });
-      })
-      .catch((err) => alert("Error al enviar la solicitud: " + err.message))
-      .finally(() => setLoading(false));
+      await setDoc(docRef, {
+        constructionName: loggedInUser.constructionName,
+        manager: loggedInUser.manager,
+        managerPhone: loggedInUser.managerPhone,
+        requestDate,
+        materials,
+      });
+
+      alert("Solicitudes enviadas exitosamente.");
+      setForms([initialFormState]);
+    } catch (error) {
+      alert("Error al enviar las solicitudes: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h2>Solicitud Semanal de Material</h2>
-      <form style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-        {/* Fecha de solicitud */}
-        <div>
-          <label>Fecha de Solicitud:</label>
-          <input
-            type="date"
-            name="requestDate"
-            value={form.requestDate}
-            readOnly
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          />
-        </div>
+    <div style={{ padding: "20px", maxWidth: "600px", margin: "50px auto", backgroundColor: "#f5f5f5", borderRadius: "12px", boxShadow: "0 0 20px rgba(0, 0, 0, 0.4)" }}>
 
-        {/* Nombre de la obra */}
-        <div>
-          <label>Nombre de la Obra:</label>
+      {/* Botón cerrar sesión */}
+      <button onClick={onLogout} style={{ position: "absolute", top: "10px", right: "10px", background: "#ff4b5c", color: "white", fontSize: "24px", padding: "10px", border: "none", borderRadius: "50%", cursor: "pointer", fontWeight: "bold" }}>
+        🔒
+      </button>
+
+      <h2 style={{ textAlign: "center", color: "#007BFF" }}>
+        Bienvenido {loggedInUser.constructionName}
+      </h2>
+
+      {/* Tarjeta de información */}
+      <div style={{ padding: "15px", backgroundColor: "#e7f3fe", borderRadius: "12px", marginBottom: "20px" }}>
+        <strong>Información del Proyecto</strong>
+        <p><strong>Auditor Asignado:</strong> {loggedInUser.manager}</p>
+        <p>
+          <strong>Teléfono:</strong>
+          <a href={`https://wa.me/${loggedInUser.managerPhone}`} target="_blank" rel="noopener noreferrer">
+            {loggedInUser.managerPhone}
+          </a>
+        </p>
+        <p><strong>Constructora:</strong> {loggedInUser.constructionName}</p>
+        <p><strong>Dirección Proyecto:</strong> {loggedInUser.projectAddress}</p>
+      </div>
+
+      {/* Mensaje de carga */}
+      {loading && <p>Cargando...</p>}
+
+      {/* Formulario para agregar materiales */}
+      {forms.map((form, index) => (
+        <div key={index} style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
           <input
             type="text"
-            name="constructionName"
-            value={form.constructionName}
-            readOnly
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          />
-        </div>
-
-        {/* Material */}
-        <div>
-          <label>Material / Elemento / Insumo:</label>
-          <input
-            type="text"
+            placeholder="Nombre del material"
             name="material"
             value={form.material}
-            onChange={handleChange}
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
+            onChange={(e) => handleChange(index, e)}
+            style={{ marginRight: "10px", flex: 1 }}
           />
-        </div>
-
-        {/* Cantidad */}
-        <div>
-          <label>Cantidad:</label>
           <input
             type="number"
+            placeholder="Cantidad"
             name="quantity"
             value={form.quantity}
-            onChange={handleChange}
-            step="0.01"
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
+            onChange={(e) => handleChange(index, e)}
+            style={{ marginRight: "10px", width: "120px" }}
           />
-        </div>
-
-        {/* Unidad */}
-        <div>
-          <label>Unidad:</label>
-          <select
-            name="unit"
-            value={form.unit}
-            onChange={handleChange}
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          >
-            <option value="metro">Metro</option>
-            <option value="rollo">Rollo</option>
+          <select name="unit" value={form.unit} onChange={(e) => handleChange(index, e)}>
             <option value="unidad">Unidad</option>
+            <option value="metro">Metro</option>
             <option value="caja">Caja</option>
             <option value="paquete">Paquete</option>
-            <option value="galón">Galón</option>
-            <option value="botella">Botella</option>
-            <option value="litro">Litro</option>
-            <option value="libra">Libra</option>
           </select>
-        </div>
 
-        {/* Encargado */}
-        <div>
-          <label>Encargado:</label>
-          <input
-            type="text"
-            name="manager"
-            value={form.manager}
-            readOnly
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          />
+          {/* Botón eliminar */}
+          <button onClick={() => handleRemoveMaterial(index)} style={{ background: "red", color: "white", padding: "5px", border: "none", borderRadius: "5px" }}>
+            Eliminar
+          </button>
         </div>
+      ))}
 
-        {/* Teléfono del encargado */}
-        <div>
-          <label>Teléfono del Encargado:</label>
-          <input
-            type="tel"
-            name="managerPhone"
-            value={form.managerPhone}
-            readOnly
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          />
-        </div>
-
-        {/* Proveedor */}
-        <div>
-          <label>Proveedor Sugerido:</label>
-          <input
-            type="text"
-            name="supplier"
-            value={form.supplier}
-            onChange={handleChange}
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          />
-        </div>
-
-        {/* Documento adjunto */}
-        <div>
-          <label>Adjuntar Cotización (opcional):</label>
-          <input
-            type="file"
-            accept=".pdf,.png,.jpg"
-            onChange={handleFileChange}
-            style={{ padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          />
-        </div>
-
-        {/* Botón de envío */}
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={loading}
-          style={{ padding: "10px", backgroundColor: "#4CAF50", color: "white", borderRadius: "5px", cursor: "pointer" }}
-        >
-          {loading ? "Enviando..." : "Enviar Solicitud"}
+      {/* Botones adicionales */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
+        <button onClick={handleAddMaterial} style={{ padding: "15px", backgroundColor: "#007BFF", color: "white", borderRadius: "8px" }}>
+          + Agregar Material
         </button>
-      </form>
+        <button onClick={handleSubmit} style={{ padding: "15px", backgroundColor: "#28a745", color: "white", borderRadius: "8px" }}>
+          Enviar Solicitudes
+        </button>
+        <button onClick={onLogout} style={{ padding: "15px", backgroundColor: "#ff4b5c", color: "white", borderRadius: "8px" }}>
+          Cerrar Sesión
+        </button>
+      </div>
+
     </div>
   );
 };
