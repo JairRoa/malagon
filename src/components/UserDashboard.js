@@ -1,274 +1,290 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { getApp } from "firebase/app";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
-const db = getFirestore(getApp());
+const ViewUser = () => {
+  const { userId } = useParams();
+  const navigate = useNavigate();
 
-const UserDashboard = ({ loggedInUser, onLogout }) => {
-  const initialFormState = useMemo(
-    () => ({
-      requestDate: new Date().toLocaleDateString(),
-      constructionName: "",
-      material: "",
-      quantity: "",
-      unit: "unidad",
-      manager: "",
-      managerPhone: "",
-      supplier: "",
-      quotation: null,
-      projectAddress: "",
-    }),
-    []
-  );
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [assignedWorks, setAssignedWorks] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [forms, setForms] = useState([initialFormState]);
-  const [loading, setLoading] = useState(false);
+  // Estado para compras realizadas
+  const [purchases, setPurchases] = useState([]);
 
+  // 1. Cargar datos del usuario
   useEffect(() => {
-    if (loggedInUser) {
-      setForms([
-        {
-          ...initialFormState,
-          constructionName: loggedInUser.constructionName || "",
-          manager: loggedInUser.manager || "",
-          managerPhone: loggedInUser.managerPhone || "",
-          projectAddress: loggedInUser.projectAddress,
-        },
-      ]);
-    }
-  }, [loggedInUser, initialFormState]);
-
-  const handleChange = (index, e) => {
-    const { name, value } = e.target;
-    const updatedForms = [...forms];
-    updatedForms[index][name] = value;
-    setForms(updatedForms);
-  };
-
-  const handleAddMaterial = () => {
-    setForms([...forms, { material: "", quantity: "", unit: "unidad" }]);
-  };
-
-  const handleRemoveMaterial = (index) => {
-    const updatedForms = forms.filter((_, idx) => idx !== index);
-    setForms(updatedForms);
-  };
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const now = new Date();
-      const requestDate = now.toLocaleDateString();
-      const requestTime = now.toLocaleTimeString().replace(/:/g, ":"); // Hora actual con ":" como separador
-
-      // Validar y mapear materiales, asegurarse de tener datos completos
-      const materials = forms
-        .filter((form) => form.material && form.quantity) // Filtrar entradas válidas
-        .map((form) => ({
-          material: form.material || "N/A",
-          quantity: form.quantity || 0,
-          unit: form.unit || "unidad",
-          supplier: form.supplier || "N/A",
-          quotation: form.quotation ? form.quotation.name : null,
-        }));
-
-      if (materials.length === 0) {
-        alert("Por favor, agrega al menos un material válido.");
+    const fetchUser = async () => {
+      try {
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          setUserData({ ...userSnap.data(), id: userId });
+        } else {
+          console.log("No se encontró el usuario.");
+        }
+      } catch (error) {
+        console.error("Error al obtener el usuario:", error.message);
+      } finally {
         setLoading(false);
-        return;
       }
+    };
+    fetchUser();
+  }, [userId]);
 
-      // Definir referencia de documento con la estructura jerárquica
-      const docRef = doc(
-        db,
-        "purchases",
-        `${now.getFullYear()}`, // Año
-        `${String(now.getMonth() + 1).padStart(2, "0")}`, // Mes
-        `${String(now.getDate()).padStart(2, "0")}`, // Día
-        `material_${requestTime}` // Nombre del documento
-      );
+  // 2. Si el usuario es auditor, obtener obras asignadas
+  useEffect(() => {
+    const fetchAssignedWorks = async () => {
+      if (userData && userData.role === "auditor") {
+        try {
+          const worksCollection = collection(db, "works");
+          const q = query(worksCollection, where("assignedAuditor", "==", userData.manager));
+          const snapshot = await getDocs(q);
+          const worksList = snapshot.docs.map((doc) => doc.data());
+          setAssignedWorks(worksList);
+        } catch (error) {
+          console.error("Error al obtener obras asignadas:", error.message);
+        }
+      }
+    };
+    fetchAssignedWorks();
+  }, [userData]);
 
-      // Guardar en Firestore
-      await setDoc(docRef, {
-        constructionName: loggedInUser.constructionName || "N/A",
-        manager: loggedInUser.manager || "N/A",
-        managerPhone: loggedInUser.managerPhone || "N/A",
-        requestDate,
-        requestTime,
-        materials,
-      });
+  // 3. Cargar compras realizadas desde Firestore
+  useEffect(() => {
+    const fetchPurchases = async () => {
+      if (!userId) return;
+      try {
+        const purchasesCol = collection(db, "purchases");
+        const q = query(purchasesCol, where("userId", "==", userId));
+        const snapshot = await getDocs(q);
+        const results = snapshot.docs.map(docSnap => docSnap.data());
+        setPurchases(results);
+      } catch (error) {
+        console.error("Error al obtener compras:", error.message);
+      }
+    };
+    fetchPurchases();
+  }, [userId]);
 
-      alert("Solicitudes enviadas exitosamente.");
-      setForms([initialFormState]);
+  if (loading) return <p>Cargando detalles del usuario...</p>;
+  if (!userData) return <p>No se encontró el usuario.</p>;
+
+  const handleGoBack = () => {
+    navigate("/admin");
+  };
+
+  // ---- EDICIÓN EN TIEMPO REAL DEL USUARIO ----
+  const handleInputChange = async (field, value) => {
+    try {
+      const updated = { ...userData, [field]: value };
+      setUserData(updated);
+      const userRef = doc(db, "users", userData.id);
+      await updateDoc(userRef, { [field]: value });
     } catch (error) {
-      alert("Error al enviar las solicitudes: " + error.message);
-    } finally {
-      setLoading(false);
+      console.error("Error al actualizar campo:", error.message);
     }
+  };
+
+  const toggleEditing = () => {
+    setIsEditing(!isEditing);
+  };
+
+  const renderField = (label, fieldName) => {
+    if (isEditing) {
+      return (
+        <p>
+          <strong>{label}: </strong>
+          <input
+            type="text"
+            value={userData[fieldName] || ""}
+            onChange={(e) => handleInputChange(fieldName, e.target.value)}
+            style={{ width: "250px" }}
+          />
+        </p>
+      );
+    } else {
+      return (
+        <p>
+          <strong>{label}: </strong>
+          {userData[fieldName] || "N/A"}
+        </p>
+      );
+    }
+  };
+
+  // Función para editar una compra (se activa solo si role === "admin")
+  const handleEditPurchase = (purchase) => {
+    if (userData.role !== "admin") return;
+    alert(`Editando compra: ${purchase.material}, Cantidad: ${purchase.quantity}`);
+    // Aquí podrías implementar:
+    // - Abrir un modal con formulario
+    // - Actualizar Firestore en tiempo real, etc.
   };
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        maxWidth: "600px",
-        margin: "50px auto",
-        backgroundColor: "#f5f5f5",
-        borderRadius: "12px",
-        boxShadow: "0 0 20px rgba(0, 0, 0, 0.4)",
-      }}
-    >
-      {/* Botón cerrar sesión */}
-      <button
-        onClick={onLogout}
-        style={{
-          position: "absolute",
-          top: "10px",
-          right: "10px",
-          background: "#ff4b5c",
-          color: "white",
-          fontSize: "24px",
-          padding: "10px",
-          border: "none",
-          borderRadius: "50%",
-          cursor: "pointer",
-          fontWeight: "bold",
-        }}
-      >
-        🔒
-      </button>
+    <div style={{ padding: "20px", maxWidth: "700px", margin: "30px auto" }}>
+      <h1>Detalles del Usuario</h1>
 
-      <h2 style={{ textAlign: "center", color: "#007BFF" }}>
-        Bienvenido {loggedInUser.constructionName}
-      </h2>
-
-      {/* Tarjeta de información */}
       <div
         style={{
-          padding: "15px",
-          backgroundColor: "#e7f3fe",
-          borderRadius: "12px",
+          backgroundColor: "#f5f5f5",
+          padding: "20px",
+          borderRadius: "10px",
           marginBottom: "20px",
         }}
       >
-        <strong>Información del Proyecto</strong>
-        <p>
-          <strong>Auditor Asignado:</strong> {loggedInUser.manager}
-        </p>
-        <p>
-          <strong>Teléfono:</strong>
-          <a
-            href={`https://wa.me/${loggedInUser.managerPhone}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {loggedInUser.managerPhone}
-          </a>
-        </p>
-        <p>
-          <strong>Constructora:</strong> {loggedInUser.constructionName}
-        </p>
-        <p>
-          <strong>Dirección Proyecto:</strong> {loggedInUser.projectAddress}
-        </p>
+        {userData.role === "admin" || userData.role === "auditor" ? (
+          <>
+            {renderField("Nombre (manager)", "manager")}
+            {renderField("Teléfono (managerPhone)", "managerPhone")}
+            {renderField("Correo (email)", "email")}
+
+            {/* Obras asignadas si es auditor */}
+            {userData.role === "auditor" && assignedWorks.length > 0 && (
+              <div style={{ marginTop: "15px" }}>
+                <h2>Obras Asignadas</h2>
+                <ul>
+                  {assignedWorks.map((work, i) => (
+                    <li key={i}>
+                      {work.constructionName} - {work.projectAddress}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        ) : (
+          // Si es user o supplier
+          <>
+            {userData.role === "user" && (
+              <>
+                {renderField("Nombre (constructionName)", "constructionName")}
+                {renderField("Dirección (projectAddress)", "projectAddress")}
+                {renderField("Constructora (constructor)", "constructor")}
+                {renderField("Encargado (manager)", "manager")}
+                {renderField("Teléfono (managerPhone)", "managerPhone")}
+                {renderField("Auditor Asignado (assignedAuditor)", "assignedAuditor")}
+                {renderField("Teléfono Auditor (auditorPhone)", "auditorPhone")}
+                {renderField("Fecha de inicio (startDate)", "startDate")}
+                {renderField("Fecha de terminación tentativa (tentativeEndDate)", "tentativeEndDate")}
+              </>
+            )}
+            {userData.role === "supplier" && (
+              <>
+                {renderField("Nombre (constructionName)", "constructionName")}
+                {renderField("Dirección (projectAddress)", "projectAddress")}
+                {renderField("Constructora (constructor)", "constructor")}
+                {renderField("Encargado (manager)", "manager")}
+                {renderField("Teléfono (managerPhone)", "managerPhone")}
+                {renderField("Auditor Asignado (assignedAuditor)", "assignedAuditor")}
+                {renderField("Teléfono Auditor (auditorPhone)", "auditorPhone")}
+              </>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Mensaje de carga */}
-      {loading && <p>Cargando...</p>}
-
-      {/* Formulario para agregar materiales */}
-      {forms.map((form, index) => (
-        <div
-          key={index}
-          style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}
-        >
-          <input
-            type="text"
-            placeholder="Nombre del material"
-            name="material"
-            value={form.material}
-            onChange={(e) => handleChange(index, e)}
-            style={{ marginRight: "10px", flex: 1 }}
-          />
-          <input
-            type="number"
-            placeholder="Cantidad"
-            name="quantity"
-            value={form.quantity}
-            onChange={(e) => handleChange(index, e)}
-            style={{ marginRight: "10px", width: "120px" }}
-          />
-          <select
-            name="unit"
-            value={form.unit}
-            onChange={(e) => handleChange(index, e)}
-          >
-            <option value="unidad">Unidad</option>
-            <option value="metro">Metro</option>
-            <option value="caja">Caja</option>
-            <option value="paquete">Paquete</option>
-          </select>
-
-          {/* Botón eliminar */}
-          <button
-            onClick={() => handleRemoveMaterial(index)}
-            style={{
-              background: "red",
-              color: "white",
-              padding: "5px",
-              border: "none",
-              borderRadius: "5px",
-            }}
-          >
-            Eliminar
-          </button>
-        </div>
-      ))}
-
-      {/* Botones adicionales */}
-      <div
+      <button
+        onClick={toggleEditing}
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginTop: "20px",
+          padding: "10px 20px",
+          backgroundColor: isEditing ? "#ff4b5c" : "#2196F3",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          marginRight: "10px",
+          cursor: "pointer",
         }}
       >
-        <button
-          onClick={handleAddMaterial}
-          style={{
-            padding: "15px",
-            backgroundColor: "#007BFF",
-            color: "white",
-            borderRadius: "8px",
-          }}
-        >
-          + Agregar Material
-        </button>
-        <button
-          onClick={handleSubmit}
-          style={{
-            padding: "15px",
-            backgroundColor: "#28a745",
-            color: "white",
-            borderRadius: "8px",
-          }}
-        >
-          Enviar Solicitudes
-        </button>
-        <button
-          onClick={onLogout}
-          style={{
-            padding: "15px",
-            backgroundColor: "#ff4b5c",
-            color: "white",
-            borderRadius: "8px",
-          }}
-        >
-          Cerrar Sesión
-        </button>
+        {isEditing ? "Finalizar Edición" : "Editar"}
+      </button>
+
+      <button
+        onClick={handleGoBack}
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#4caf50",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Regresar
+      </button>
+
+      {/* ---- Sección de COMPRAS REALIZADAS ---- */}
+      <div
+        style={{
+          marginTop: "30px",
+          backgroundColor: "#fff",
+          padding: "20px",
+          borderRadius: "12px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+        }}
+      >
+        <h2 style={{ marginBottom: "15px" }}>Compras Realizadas</h2>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ backgroundColor: "#f5f5f5" }}>
+              <th style={thStyle}>Fecha</th>
+              <th style={thStyle}>Material</th>
+              <th style={thStyle}>Cantidad</th>
+              <th style={thStyle}>Unidad</th>
+              <th style={thStyle}>Proveedor</th>
+              {userData.role === "admin" && <th style={thStyle}>Acciones</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {purchases.map((purchase, index) => (
+              <tr key={index}>
+                <td style={tdStyle}>{purchase.requestDate || "N/A"}</td>
+                {/* Suponiendo que cada 'purchase' puede tener varios materiales 
+                    Si tus compras guardan 'materials' como array, ajusta el mapeo. 
+                    Aquí, asumimos un 'purchase' con 'material' suelto. */}
+                <td style={tdStyle}>{purchase.material || "N/A"}</td>
+                <td style={tdStyle}>{purchase.quantity || 0}</td>
+                <td style={tdStyle}>{purchase.unit || "N/A"}</td>
+                <td style={tdStyle}>{purchase.supplier || "N/A"}</td>
+                {userData.role === "admin" && (
+                  <td style={tdStyle}>
+                    <button style={editBtnStyle} onClick={() => handleEditPurchase(purchase)}>
+                      Editar
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 };
 
-export default UserDashboard;
+// Estilos básicos
+const thStyle = {
+  border: "1px solid #ccc",
+  padding: "10px",
+  textAlign: "left",
+};
+
+const tdStyle = {
+  border: "1px solid #ccc",
+  padding: "10px",
+};
+
+const editBtnStyle = {
+  padding: "8px 12px",
+  backgroundColor: "#007BFF",
+  color: "#fff",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+};
+
+export default ViewUser;

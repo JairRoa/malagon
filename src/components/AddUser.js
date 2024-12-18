@@ -26,19 +26,19 @@ const AddUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden");
       return;
     }
-
+  
     if (!role || !email || !password) {
       alert("Todos los campos obligatorios deben ser llenados");
       return;
     }
-
+  
     const userData = {
-      role,
+      role: role.toLowerCase(), // Convertir el rol a minúsculas
       email,
       constructionName,
       manager,
@@ -50,22 +50,22 @@ const AddUser = () => {
       startDate,
       tentativeEndDate,
     };
-
+  
     try {
       // Crear nuevo usuario sin cambiar el estado del administrador actual
       const currentUser = newUserAuth.currentUser;
-
+  
       const userCredential = await createUserWithEmailAndPassword(
         newUserAuth,
         email,
         password
       );
       const uid = userCredential.user.uid;
-
+  
       await setDoc(doc(db, "users", uid), userData);
-
-      alert(`Usuario con rol "${role}" creado con éxito`);
-
+  
+      alert(`Usuario con rol "${role.toLowerCase()}" creado con éxito`);
+  
       // Restaurar el login del administrador y redirigir al panel
       if (currentUser) {
         await newUserAuth.updateCurrentUser(currentUser);

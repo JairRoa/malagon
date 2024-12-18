@@ -1,7 +1,7 @@
+import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const db = getFirestore();
@@ -19,34 +19,46 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Iniciar sesión con email y contraseña
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      // Obtener el rol del usuario desde Firestore
       const userDoc = await getDoc(doc(db, "users", uid));
-      if (userDoc.exists()) {
-        const userRole = userDoc.data().role;
-
-        // Redirigir según el rol
-        if (userRole === "User") {
-          navigate("/user");
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        throw new Error("No se encontró información de usuario.");
+      if (!userDoc.exists()) {
+        throw new Error("No se encontró información de usuario en Firestore.");
       }
-    } catch (error) {
-      setError("Error al iniciar sesión: Verifica tus credenciales.");
-      console.error("Error al iniciar sesión:", error.message);
+
+      const userData = userDoc.data();
+      if (!userData.role) {
+        throw new Error("El campo 'role' no está definido en el documento del usuario.");
+      }
+
+      // Redirigir según el rol
+      switch (userData.role) {
+        case "admin":
+          navigate("/admin");
+          break;
+        case "user":
+          navigate("/user");
+          break;
+        case "auditor":
+          navigate("/auditor");
+          break;
+        case "supplier":
+          navigate("/supplier");
+          break;
+        default:
+          throw new Error(`Rol desconocido: ${userData.role}`);
+      }
+    } catch (err) {
+      console.error("Error al iniciar sesión:", err);
+      setError(`Error al iniciar sesión: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "0 auto", padding: "20px", textAlign: "center" }}>
+    <div style={{ maxWidth: 400, margin: "0 auto", padding: 20, textAlign: "center" }}>
       <h2>Iniciar Sesión</h2>
       <form onSubmit={handleLogin}>
         <input
@@ -55,13 +67,7 @@ const Login = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-          }}
+          style={{ width: "100%", padding: 10, marginBottom: 10 }}
         />
         <input
           type="password"
@@ -69,13 +75,7 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-          }}
+          style={{ width: "100%", padding: 10, marginBottom: 10 }}
         />
         {error && <p style={{ color: "red" }}>{error}</p>}
         <button
@@ -83,11 +83,11 @@ const Login = () => {
           disabled={loading}
           style={{
             width: "100%",
-            padding: "10px",
+            padding: 10,
             backgroundColor: "#007BFF",
             color: "#fff",
             border: "none",
-            borderRadius: "5px",
+            borderRadius: 5,
             cursor: loading ? "not-allowed" : "pointer",
           }}
         >

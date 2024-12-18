@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+
+// Componentes
 import AdminPanel from "./components/AdminPanel";
 import Login from "./components/Login";
 import UserDashboard from "./components/UserDashboard";
 import AuditorDashboard from "./components/AuditorDashboard";
+import SupplierDashboard from "./components/SupplierDashboard";
+
 import AddBuilding from "./components/AddBuilding";
 import AddUser from "./components/AddUser";
 import EditUser from "./components/EditUser";
@@ -11,33 +15,33 @@ import ViewUser from "./components/ViewUser";
 import AddDataForm from "./components/AddDataForm";
 import UpdateData from "./components/UpdateData";
 import TestFirestore from "./components/TestFirestore";
+
+// Firebase
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "./firebaseConfig"; // Importamos la base de datos
+import { auth, db } from "./firebaseConfig";
 import { getDoc, doc } from "firebase/firestore";
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [loggedInUser, setLoggedInUser] = useState(null); // Estado para guardar los datos del usuario
+  const [loggedInUser, setLoggedInUser] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          // Obtener los datos del usuario desde Firestore
+          // Obtener el documento Firestore del usuario
           const userRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userRef);
+
           if (userSnap.exists()) {
             setLoggedInUser(userSnap.data());
           } else {
-            console.error("No se encontraron datos del usuario.");
+            console.error("No se encontraron datos del usuario en Firestore.");
           }
         } catch (err) {
           console.error("Error al obtener los datos del usuario:", err);
         }
-        setIsAuthenticated(true);
       } else {
-        setIsAuthenticated(false);
         setLoggedInUser(null);
       }
       setLoading(false);
@@ -47,38 +51,65 @@ const App = () => {
   }, []);
 
   if (loading) {
-    return <p>Cargando...</p>;
+    return <p style={{ textAlign: "center", marginTop: "50px" }}>Cargando...</p>;
   }
 
   return (
     <Routes>
-      <Route path="/" element={isAuthenticated ? <Navigate to="/admin" /> : <Login />} />
-      <Route path="/admin" element={isAuthenticated ? <AdminPanel /> : <Navigate to="/" />} />
+      {/* Ruta principal (Login) */}
+      <Route path="/" element={<Login />} />
+
+      {/* Panel de administrador */}
+      <Route
+        path="/admin"
+        element={loggedInUser ? <AdminPanel /> : <Navigate to="/" />}
+      />
+
+      {/* Panel de usuario */}
       <Route
         path="/user"
-        element={
-          isAuthenticated ? <UserDashboard loggedInUser={loggedInUser} /> : <Navigate to="/" />
-        }
+        element={loggedInUser ? <UserDashboard loggedInUser={loggedInUser} /> : <Navigate to="/" />}
       />
-      <Route path="/auditor" element={isAuthenticated ? <AuditorDashboard /> : <Navigate to="/" />} />
-      <Route path="/add-building" element={isAuthenticated ? <AddBuilding /> : <Navigate to="/" />} />
-      <Route path="/add-user" element={isAuthenticated ? <AddUser /> : <Navigate to="/" />} />
+
+      {/* Panel de auditor */}
+      <Route
+        path="/auditor"
+        element={loggedInUser ? <AuditorDashboard /> : <Navigate to="/" />}
+      />
+
+      {/* Panel de supplier */}
+      <Route
+        path="/supplier"
+        element={loggedInUser ? <SupplierDashboard /> : <Navigate to="/" />}
+      />
+
+      <Route
+        path="/add-building"
+        element={loggedInUser ? <AddBuilding /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/add-user"
+        element={loggedInUser ? <AddUser /> : <Navigate to="/" />}
+      />
       <Route
         path="/edit-user/:userId"
-        element={isAuthenticated ? <EditUser /> : <Navigate to="/" />}
+        element={loggedInUser ? <EditUser /> : <Navigate to="/" />}
       />
       <Route
         path="/view-user/:userId"
-        element={isAuthenticated ? <ViewUser /> : <Navigate to="/" />}
+        element={loggedInUser ? <ViewUser /> : <Navigate to="/" />}
       />
-      <Route path="/add-data" element={isAuthenticated ? <AddDataForm /> : <Navigate to="/" />} />
+      <Route
+        path="/add-data"
+        element={loggedInUser ? <AddDataForm /> : <Navigate to="/" />}
+      />
       <Route
         path="/update-data/:docId"
-        element={isAuthenticated ? <UpdateData /> : <Navigate to="/" />}
+        element={loggedInUser ? <UpdateData /> : <Navigate to="/" />}
       />
       <Route
         path="/test-firestore"
-        element={isAuthenticated ? <TestFirestore /> : <Navigate to="/" />}
+        element={loggedInUser ? <TestFirestore /> : <Navigate to="/" />}
       />
     </Routes>
   );
