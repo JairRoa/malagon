@@ -34,7 +34,7 @@ const AdminPanel = () => {
 
     const user = auth.currentUser;
     if (user) {
-      setCurrentUser(user.displayName || user.email);
+      setCurrentUser(user);
     }
   }, []);
 
@@ -42,6 +42,11 @@ const AdminPanel = () => {
   const handleModifyUser = (userId) => navigate(`/edit-user/${userId}`);
   const handleViewUser = (userId) => navigate(`/view-user/${userId}`);
   const handleDeleteUser = async (userId) => {
+    if (currentUser && currentUser.uid === userId) {
+      alert("No puedes eliminar tu propia cuenta.");
+      return;
+    }
+
     if (window.confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
       try {
         await deleteDoc(doc(db, "users", userId));
@@ -63,7 +68,7 @@ const AdminPanel = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Bienvenido {currentUser || "Usuario"}</h1>
+      <h1>Bienvenido {currentUser?.displayName || currentUser?.email || "Usuario"}</h1>
 
       {/* Navbar */}
       <nav style={navbarStyle}>

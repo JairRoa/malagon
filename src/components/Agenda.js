@@ -1,16 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
-import esLocale from "date-fns/locale/es";
+import es from "date-fns/locale/es";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./Agenda.css";
 
 Modal.setAppElement("#root");
 
 const locales = {
-  es: esLocale,
+  es: es,
 };
+
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -29,16 +30,34 @@ const Agenda = () => {
     recipients: "",
     description: "",
   });
-
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Abrir modal
+  // Cargar eventos desde el Local Storage
+  useEffect(() => {
+    const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
+    const updatedEvents = storedEvents.map((event) => {
+      const now = new Date();
+      const eventEnd = new Date(event.end);
+      if (eventEnd < now && !event.description.includes("Finalizado")) {
+        event.description = event.description
+          ? `${event.description} - Finalizado`
+          : "Finalizado";
+      }
+      return event;
+    });
+    setEvents(updatedEvents);
+  }, []);
+
+  // Guardar eventos en el Local Storage
+  useEffect(() => {
+    localStorage.setItem("events", JSON.stringify(events));
+  }, [events]);
+
   const openModal = (slotInfo) => {
     setSelectedDate(slotInfo.start);
     setModalIsOpen(true);
   };
 
-  // Cerrar modal
   const closeModal = () => {
     setModalIsOpen(false);
     setFormData({
@@ -50,20 +69,22 @@ const Agenda = () => {
     });
   };
 
-  // Manejar cambios en el formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Agregar evento
   const handleAddEvent = () => {
     if (formData.title && formData.startTime && formData.endTime) {
       const newEvent = {
         title: formData.title,
-        start: new Date(`${format(selectedDate, "yyyy-MM-dd")}T${formData.startTime}`),
-        end: new Date(`${format(selectedDate, "yyyy-MM-dd")}T${formData.endTime}`),
-        description: formData.description,
+        start: new Date(
+          `${format(selectedDate, "yyyy-MM-dd")}T${formData.startTime}`
+        ),
+        end: new Date(
+          `${format(selectedDate, "yyyy-MM-dd")}T${formData.endTime}`
+        ),
+        description: formData.description || "",
         recipients: formData.recipients,
       };
       setEvents([...events, newEvent]);
@@ -75,7 +96,7 @@ const Agenda = () => {
 
   return (
     <div style={{ display: "flex" }}>
-      {/* Calendario a la izquierda */}
+      {/* Calendario */}
       <div style={{ flex: 1, padding: "20px" }}>
         <h2 style={{ textAlign: "center" }}>Agenda</h2>
         <Calendar
@@ -93,45 +114,32 @@ const Agenda = () => {
             month: "Mes",
             week: "Semana",
             day: "Día",
+            agenda: "Agenda",
+            date: "Fecha",
+            time: "Hora",
+            event: "Evento",
+            noEventsInRange: "No hay eventos en este rango.",
+            showMore: (total) => `+ Ver más (${total})`,
           }}
         />
       </div>
 
-      {/* Lista de reuniones */}
-      <div style={{ flex: 1, padding: "20px" }}>
-        <h2 style={{ textAlign: "center" }}>Reuniones del Día</h2>
-        {events.length > 0 ? (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {events.map((event, index) => (
-              <li
-                key={index}
-                style={{
-                  backgroundColor: "#f0f0f0",
-                  marginBottom: "10px",
-                  padding: "10px",
-                  borderRadius: "5px",
-                }}
-              >
-                <strong>{event.title}</strong>
-                <p>Hora: {format(event.start, "HH:mm")} - {format(event.end, "HH:mm")}</p>
-                <p>Destinatarios: {event.recipients}</p>
-                <p>Descripción: {event.description}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p style={{ textAlign: "center" }}>No hay reuniones programadas para este día.</p>
-        )}
-      </div>
-
-      {/* Modal para agregar evento */}
+      {/* Modal */}
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
-        className="ReactModal__Content"
-        overlayClassName="overlay"
+        contentLabel="Agregar Reunión"
+        style={{
+          overlay: { backgroundColor: "rgba(0, 0, 0, 0.75)" },
+          content: {
+            backgroundColor: "#fff",
+            maxWidth: "500px",
+            margin: "auto",
+            borderRadius: "10px",
+          },
+        }}
       >
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Agregar Reunión</h2>
+        <h2 style={{ textAlign: "center" }}>Agregar Reunión</h2>
         <div>
           <label>Título:</label>
           <input
@@ -139,7 +147,6 @@ const Agenda = () => {
             name="title"
             value={formData.title}
             onChange={handleInputChange}
-            placeholder="Título de la reunión"
           />
 
           <label>Hora de Inicio:</label>
@@ -164,7 +171,6 @@ const Agenda = () => {
             name="recipients"
             value={formData.recipients}
             onChange={handleInputChange}
-            placeholder="correo1@ejemplo.com, correo2@ejemplo.com"
           />
 
           <label>Descripción (máximo 200 palabras):</label>
@@ -172,15 +178,35 @@ const Agenda = () => {
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-            rows="4"
             maxLength="200"
-          />
+          ></textarea>
 
-          <div style={{ marginTop: "20px", textAlign: "right" }}>
-            <button onClick={handleAddEvent} className="add-button">
+          <div style={{ marginTop: "20px", textAlign: "center" }}>
+            <button
+              onClick={handleAddEvent}
+              style={{
+                padding: "10px 15px",
+                backgroundColor: "#28a745",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+                marginRight: "10px",
+              }}
+            >
               Agregar Evento
             </button>
-            <button onClick={closeModal} className="cancel-button">
+            <button
+              onClick={closeModal}
+              style={{
+                padding: "10px 15px",
+                backgroundColor: "#dc3545",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+            >
               Cancelar
             </button>
           </div>

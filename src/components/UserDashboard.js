@@ -1,290 +1,403 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import React, { useState, useEffect, useMemo } from "react";
+import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { getApp } from "firebase/app";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebaseConfig";
+import { useNavigate } from "react-router-dom";
 
-const ViewUser = () => {
-  const { userId } = useParams();
+const db = getFirestore(getApp());
+
+const UserDashboard = ({ loggedInUser }) => {
   const navigate = useNavigate();
 
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [assignedWorks, setAssignedWorks] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
+  // ---------- ESTADOS PARA EL FORMULARIO DE SOLICITUD ----------
+  const initialFormState = useMemo(() => ({
+    requestDate: new Date().toLocaleDateString(),
+    constructionName: "",
+    material: "",
+    quantity: "",
+    unit: "unidad",
+    manager: "",
+    managerPhone: "",
+    supplier: "",
+    quotation: null,
+    projectAddress: "",
+  }), []);
 
-  // Estado para compras realizadas
-  const [purchases, setPurchases] = useState([]);
+  const [forms, setForms] = useState([initialFormState]);
+  const [loading, setLoading] = useState(false);
 
-  // 1. Cargar datos del usuario
+  // ---------- ESTADOS Y LÓGICA PARA MOSTRAR PEDIDOS ----------
+  const [requests, setRequests] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
+
+  // Cargar la información del usuario en el formulario
   useEffect(() => {
-    const fetchUser = async () => {
+    if (loggedInUser) {
+      setForms([
+        {
+          ...initialFormState,
+          constructionName: loggedInUser.constructionName || "",
+          manager: loggedInUser.manager || "",
+          managerPhone: loggedInUser.managerPhone || "",
+          projectAddress: loggedInUser.projectAddress || "",
+        },
+      ]);
+    }
+  }, [loggedInUser, initialFormState]);
+
+  // Cargar TODAS las solicitudes del usuario
+  useEffect(() => {
+    const fetchRequests = async () => {
+      if (!loggedInUser) return;
       try {
-        const userRef = doc(db, "users", userId);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          setUserData({ ...userSnap.data(), id: userId });
-        } else {
-          console.log("No se encontró el usuario.");
-        }
-      } catch (error) {
-        console.error("Error al obtener el usuario:", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, [userId]);
+        const currentUid = loggedInUser.uid || auth.currentUser?.uid;
+        if (!currentUid) return;
 
-  // 2. Si el usuario es auditor, obtener obras asignadas
-  useEffect(() => {
-    const fetchAssignedWorks = async () => {
-      if (userData && userData.role === "auditor") {
-        try {
-          const worksCollection = collection(db, "works");
-          const q = query(worksCollection, where("assignedAuditor", "==", userData.manager));
-          const snapshot = await getDocs(q);
-          const worksList = snapshot.docs.map((doc) => doc.data());
-          setAssignedWorks(worksList);
-        } catch (error) {
-          console.error("Error al obtener obras asignadas:", error.message);
-        }
-      }
-    };
-    fetchAssignedWorks();
-  }, [userData]);
-
-  // 3. Cargar compras realizadas desde Firestore
-  useEffect(() => {
-    const fetchPurchases = async () => {
-      if (!userId) return;
-      try {
         const purchasesCol = collection(db, "purchases");
-        const q = query(purchasesCol, where("userId", "==", userId));
+        const q = query(purchasesCol, where("userId", "==", currentUid));
         const snapshot = await getDocs(q);
+
         const results = snapshot.docs.map(docSnap => docSnap.data());
-        setPurchases(results);
+        setRequests(results);
       } catch (error) {
-        console.error("Error al obtener compras:", error.message);
+        console.error("Error al obtener pedidos:", error.message);
       }
     };
-    fetchPurchases();
-  }, [userId]);
+    fetchRequests();
+  }, [loggedInUser]);
 
-  if (loading) return <p>Cargando detalles del usuario...</p>;
-  if (!userData) return <p>No se encontró el usuario.</p>;
-
-  const handleGoBack = () => {
-    navigate("/admin");
+  // Manejo de campos del formulario
+  const handleChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedForms = [...forms];
+    updatedForms[index][name] = value;
+    setForms(updatedForms);
   };
 
-  // ---- EDICIÓN EN TIEMPO REAL DEL USUARIO ----
-  const handleInputChange = async (field, value) => {
+  const handleAddMaterial = () => {
+    setForms([...forms, { material: "", quantity: "", unit: "unidad" }]);
+  };
+
+  const handleRemoveMaterial = (index) => {
+    const updatedForms = forms.filter((_, idx) => idx !== index);
+    setForms(updatedForms);
+  };
+
+  // Cerrar sesión
+  const handleLogout = async () => {
     try {
-      const updated = { ...userData, [field]: value };
-      setUserData(updated);
-      const userRef = doc(db, "users", userData.id);
-      await updateDoc(userRef, { [field]: value });
+      await signOut(auth);
+      navigate("/");
     } catch (error) {
-      console.error("Error al actualizar campo:", error.message);
+      console.error("Error al cerrar sesión:", error);
     }
   };
 
-  const toggleEditing = () => {
-    setIsEditing(!isEditing);
-  };
+  // Enviar solicitudes a Firestore
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const now = new Date();
+      const requestDate = now.toLocaleDateString();
+      
+      // Hora con dos puntos, tal cual queremos mostrarla
+      const requestTime = now.toLocaleTimeString();
 
-  const renderField = (label, fieldName) => {
-    if (isEditing) {
-      return (
-        <p>
-          <strong>{label}: </strong>
-          <input
-            type="text"
-            value={userData[fieldName] || ""}
-            onChange={(e) => handleInputChange(fieldName, e.target.value)}
-            style={{ width: "250px" }}
-          />
-        </p>
-      );
-    } else {
-      return (
-        <p>
-          <strong>{label}: </strong>
-          {userData[fieldName] || "N/A"}
-        </p>
-      );
+      // Mapeo de materiales
+      const materials = forms
+        .filter(form => form.material && form.quantity)
+        .map(form => ({
+          material: form.material,
+          quantity: form.quantity,
+          unit: form.unit,
+          supplier: form.supplier || "N/A",
+          quotation: form.quotation ? form.quotation.name : null,
+        }));
+
+      if (materials.length === 0) {
+        alert("Por favor, agrega al menos un material válido.");
+        setLoading(false);
+        return;
+      }
+
+      // El docId sí puede reemplazar ":" para evitar errores en la ruta
+      const docId = `${now.getFullYear()}-${
+        String(now.getMonth() + 1).padStart(2, "0")
+      }-${String(now.getDate()).padStart(2, "0")}_${requestTime.replace(/:/g, "-")}`;
+
+      const currentUid = loggedInUser?.uid || auth.currentUser?.uid || "unknown";
+
+      await setDoc(doc(db, "purchases", docId), {
+        userId: currentUid,
+        manager: loggedInUser?.manager || "N/A",
+        managerPhone: loggedInUser?.managerPhone || "N/A",
+        constructionName: loggedInUser?.constructionName || "N/A",
+        projectAddress: loggedInUser?.projectAddress || "N/A",
+        requestDate,
+        requestTime, // Guardar la hora con ":" en la base de datos
+        materials,
+      });
+
+      alert("Solicitudes enviadas exitosamente.");
+      setForms([initialFormState]);
+
+      // Actualizar pedidos localmente
+      setRequests(prev => [
+        ...prev,
+        {
+          userId: currentUid,
+          manager: loggedInUser?.manager || "N/A",
+          managerPhone: loggedInUser?.managerPhone || "N/A",
+          constructionName: loggedInUser?.constructionName || "N/A",
+          projectAddress: loggedInUser?.projectAddress || "N/A",
+          requestDate,
+          requestTime,
+          materials,
+        },
+      ]);
+    } catch (error) {
+      alert("Error al enviar las solicitudes: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Función para editar una compra (se activa solo si role === "admin")
-  const handleEditPurchase = (purchase) => {
-    if (userData.role !== "admin") return;
-    alert(`Editando compra: ${purchase.material}, Cantidad: ${purchase.quantity}`);
-    // Aquí podrías implementar:
-    // - Abrir un modal con formulario
-    // - Actualizar Firestore en tiempo real, etc.
-  };
+  // Fechas únicas
+  const uniqueDates = [...new Set(requests.map(req => req.requestDate))]
+    .sort((a, b) => new Date(a) - new Date(b));
+
+  // Filtrar pedidos por fecha
+  const filteredRequests = requests.filter(r => r.requestDate === selectedDate);
 
   return (
-    <div style={{ padding: "20px", maxWidth: "700px", margin: "30px auto" }}>
-      <h1>Detalles del Usuario</h1>
+    <div
+      style={{
+        padding: "20px",
+        maxWidth: "800px",
+        margin: "50px auto",
+        backgroundColor: "#f5f5f5",
+        borderRadius: "12px",
+        boxShadow: "0 0 20px rgba(0, 0, 0, 0.4)",
+        position: "relative",
+      }}
+    >
+      {/* Botón cerrar sesión */}
+      <button
+        onClick={handleLogout}
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          background: "#ff4b5c",
+          color: "white",
+          fontSize: "24px",
+          padding: "10px",
+          border: "none",
+          borderRadius: "50%",
+          cursor: "pointer",
+          fontWeight: "bold",
+        }}
+      >
+        🔒
+      </button>
 
+      <h2 style={{ textAlign: "center", color: "#007BFF" }}>
+        Bienvenido {loggedInUser?.constructionName || "Usuario"}
+      </h2>
+
+      {/* Info del Proyecto */}
       <div
         style={{
-          backgroundColor: "#f5f5f5",
-          padding: "20px",
-          borderRadius: "10px",
+          padding: "15px",
+          backgroundColor: "#e7f3fe",
+          borderRadius: "12px",
           marginBottom: "20px",
         }}
       >
-        {userData.role === "admin" || userData.role === "auditor" ? (
-          <>
-            {renderField("Nombre (manager)", "manager")}
-            {renderField("Teléfono (managerPhone)", "managerPhone")}
-            {renderField("Correo (email)", "email")}
-
-            {/* Obras asignadas si es auditor */}
-            {userData.role === "auditor" && assignedWorks.length > 0 && (
-              <div style={{ marginTop: "15px" }}>
-                <h2>Obras Asignadas</h2>
-                <ul>
-                  {assignedWorks.map((work, i) => (
-                    <li key={i}>
-                      {work.constructionName} - {work.projectAddress}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </>
-        ) : (
-          // Si es user o supplier
-          <>
-            {userData.role === "user" && (
-              <>
-                {renderField("Nombre (constructionName)", "constructionName")}
-                {renderField("Dirección (projectAddress)", "projectAddress")}
-                {renderField("Constructora (constructor)", "constructor")}
-                {renderField("Encargado (manager)", "manager")}
-                {renderField("Teléfono (managerPhone)", "managerPhone")}
-                {renderField("Auditor Asignado (assignedAuditor)", "assignedAuditor")}
-                {renderField("Teléfono Auditor (auditorPhone)", "auditorPhone")}
-                {renderField("Fecha de inicio (startDate)", "startDate")}
-                {renderField("Fecha de terminación tentativa (tentativeEndDate)", "tentativeEndDate")}
-              </>
-            )}
-            {userData.role === "supplier" && (
-              <>
-                {renderField("Nombre (constructionName)", "constructionName")}
-                {renderField("Dirección (projectAddress)", "projectAddress")}
-                {renderField("Constructora (constructor)", "constructor")}
-                {renderField("Encargado (manager)", "manager")}
-                {renderField("Teléfono (managerPhone)", "managerPhone")}
-                {renderField("Auditor Asignado (assignedAuditor)", "assignedAuditor")}
-                {renderField("Teléfono Auditor (auditorPhone)", "auditorPhone")}
-              </>
-            )}
-          </>
-        )}
+        <strong>Información del Proyecto</strong>
+        <p>
+          <strong>Auditor Asignado: </strong>
+          {loggedInUser?.manager || "N/A"}
+        </p>
+        <p>
+          <strong>Teléfono: </strong>
+          <a
+            href={`https://wa.me/${loggedInUser?.managerPhone}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {loggedInUser?.managerPhone || "N/A"}
+          </a>
+        </p>
+        <p>
+          <strong>Constructora: </strong>
+          {loggedInUser?.constructionName || "N/A"}
+        </p>
+        <p>
+          <strong>Dirección Proyecto: </strong>
+          {loggedInUser?.projectAddress || "N/A"}
+        </p>
       </div>
 
-      <button
-        onClick={toggleEditing}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: isEditing ? "#ff4b5c" : "#2196F3",
-          color: "#fff",
-          border: "none",
-          borderRadius: "5px",
-          marginRight: "10px",
-          cursor: "pointer",
-        }}
-      >
-        {isEditing ? "Finalizar Edición" : "Editar"}
-      </button>
+      {loading && <p>Cargando...</p>}
 
-      <button
-        onClick={handleGoBack}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#4caf50",
-          color: "#fff",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        Regresar
-      </button>
+      {/* Formulario: materiales */}
+      {forms.map((form, index) => (
+        <div key={index} style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
+          <input
+            type="text"
+            placeholder="Nombre del material"
+            name="material"
+            value={form.material}
+            onChange={(e) => handleChange(index, e)}
+            style={{ marginRight: "10px", flex: 1 }}
+          />
+          <input
+            type="number"
+            placeholder="Cantidad"
+            name="quantity"
+            value={form.quantity}
+            onChange={(e) => handleChange(index, e)}
+            style={{ marginRight: "10px", width: "120px" }}
+          />
+          <select
+            name="unit"
+            value={form.unit}
+            onChange={(e) => handleChange(index, e)}
+          >
+            <option value="unidad">Unidad</option>
+            <option value="metro">Metro</option>
+            <option value="caja">Caja</option>
+            <option value="paquete">Paquete</option>
+          </select>
 
-      {/* ---- Sección de COMPRAS REALIZADAS ---- */}
+          <button
+            onClick={() => handleRemoveMaterial(index)}
+            style={{
+              background: "red",
+              color: "white",
+              padding: "5px",
+              border: "none",
+              borderRadius: "5px",
+              marginLeft: "10px",
+            }}
+          >
+            Eliminar
+          </button>
+        </div>
+      ))}
+
+      {/* Botones */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
+        <button
+          onClick={handleAddMaterial}
+          style={{
+            padding: "15px",
+            backgroundColor: "#007BFF",
+            color: "white",
+            borderRadius: "8px",
+          }}
+        >
+          + Agregar Material
+        </button>
+        <button
+          onClick={handleSubmit}
+          style={{
+            padding: "15px",
+            backgroundColor: "#28a745",
+            color: "white",
+            borderRadius: "8px",
+          }}
+        >
+          Enviar Solicitudes
+        </button>
+        <button
+          onClick={handleLogout}
+          style={{
+            padding: "15px",
+            backgroundColor: "#ff4b5c",
+            color: "white",
+            borderRadius: "8px",
+          }}
+        >
+          Cerrar Sesión
+        </button>
+      </div>
+
+      {/* Sección "Tus pedidos" */}
       <div
         style={{
-          marginTop: "30px",
+          marginTop: "40px",
           backgroundColor: "#fff",
           padding: "20px",
           borderRadius: "12px",
           boxShadow: "0 0 10px rgba(0,0,0,0.2)",
         }}
       >
-        <h2 style={{ marginBottom: "15px" }}>Compras Realizadas</h2>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#f5f5f5" }}>
-              <th style={thStyle}>Fecha</th>
-              <th style={thStyle}>Material</th>
-              <th style={thStyle}>Cantidad</th>
-              <th style={thStyle}>Unidad</th>
-              <th style={thStyle}>Proveedor</th>
-              {userData.role === "admin" && <th style={thStyle}>Acciones</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {purchases.map((purchase, index) => (
-              <tr key={index}>
-                <td style={tdStyle}>{purchase.requestDate || "N/A"}</td>
-                {/* Suponiendo que cada 'purchase' puede tener varios materiales 
-                    Si tus compras guardan 'materials' como array, ajusta el mapeo. 
-                    Aquí, asumimos un 'purchase' con 'material' suelto. */}
-                <td style={tdStyle}>{purchase.material || "N/A"}</td>
-                <td style={tdStyle}>{purchase.quantity || 0}</td>
-                <td style={tdStyle}>{purchase.unit || "N/A"}</td>
-                <td style={tdStyle}>{purchase.supplier || "N/A"}</td>
-                {userData.role === "admin" && (
-                  <td style={tdStyle}>
-                    <button style={editBtnStyle} onClick={() => handleEditPurchase(purchase)}>
-                      Editar
-                    </button>
-                  </td>
-                )}
+        <h2 style={{ marginBottom: "20px", color: "#007BFF" }}>Tus pedidos</h2>
+
+        <label style={{ marginRight: "10px" }}>
+          <strong>Selecciona una fecha:</strong>
+        </label>
+        <select
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          style={{ padding: "5px 10px", marginBottom: "20px" }}
+        >
+          <option value="">--Seleccione--</option>
+          {uniqueDates.map((date) => (
+            <option key={date} value={date}>
+              {date}
+            </option>
+          ))}
+        </select>
+
+        {selectedDate && filteredRequests.length > 0 && (
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px" }}>
+            <thead>
+              <tr style={{ backgroundColor: "#e7f3fe" }}>
+                <th style={thStyle}>Fecha</th>
+                <th style={thStyle}>Hora de Solicitud</th>
+                <th style={thStyle}>Material</th>
+                <th style={thStyle}>Cantidad</th>
+                <th style={thStyle}>Unidad</th>
+                <th style={thStyle}>Manager</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredRequests.map((req, idx) =>
+                req.materials.map((item, i) => (
+                  <tr key={`${idx}-${i}`} style={{ textAlign: "center" }}>
+                    <td style={tdStyle}>{req.requestDate}</td>
+                    <td style={tdStyle}>{req.requestTime}</td>
+                    <td style={tdStyle}>{item.material}</td>
+                    <td style={tdStyle}>{item.quantity}</td>
+                    <td style={tdStyle}>{item.unit}</td>
+                    <td style={tdStyle}>{req.manager}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
+
+        {selectedDate && filteredRequests.length === 0 && (
+          <p>No hay pedidos para la fecha seleccionada.</p>
+        )}
       </div>
     </div>
   );
 };
 
-// Estilos básicos
 const thStyle = {
   border: "1px solid #ccc",
-  padding: "10px",
-  textAlign: "left",
+  padding: "8px",
 };
 
 const tdStyle = {
   border: "1px solid #ccc",
-  padding: "10px",
+  padding: "8px",
 };
 
-const editBtnStyle = {
-  padding: "8px 12px",
-  backgroundColor: "#007BFF",
-  color: "#fff",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-};
-
-export default ViewUser;
+export default UserDashboard;

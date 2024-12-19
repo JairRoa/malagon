@@ -7,7 +7,6 @@ import Login from "./components/Login";
 import UserDashboard from "./components/UserDashboard";
 import AuditorDashboard from "./components/AuditorDashboard";
 import SupplierDashboard from "./components/SupplierDashboard";
-
 import AddBuilding from "./components/AddBuilding";
 import AddUser from "./components/AddUser";
 import EditUser from "./components/EditUser";
@@ -29,12 +28,10 @@ const App = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          // Obtener el documento Firestore del usuario
           const userRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userRef);
-
           if (userSnap.exists()) {
-            setLoggedInUser(userSnap.data());
+            setLoggedInUser({ uid: user.uid, ...userSnap.data() });
           } else {
             console.error("No se encontraron datos del usuario en Firestore.");
           }
@@ -56,61 +53,54 @@ const App = () => {
 
   return (
     <Routes>
-      {/* Ruta principal (Login) */}
       <Route path="/" element={<Login />} />
-
-      {/* Panel de administrador */}
       <Route
         path="/admin"
-        element={loggedInUser ? <AdminPanel /> : <Navigate to="/" />}
+        element={
+          loggedInUser && loggedInUser.role === "admin" ? (
+            <AdminPanel loggedInUser={loggedInUser} />
+          ) : (
+            <Navigate to="/" />
+          )
+        }
       />
-
-      {/* Panel de usuario */}
       <Route
         path="/user"
-        element={loggedInUser ? <UserDashboard loggedInUser={loggedInUser} /> : <Navigate to="/" />}
+        element={
+          loggedInUser && loggedInUser.role === "user" ? (
+            <UserDashboard loggedInUser={loggedInUser} />
+          ) : (
+            <Navigate to="/" />
+          )
+        }
       />
-
-      {/* Panel de auditor */}
       <Route
         path="/auditor"
-        element={loggedInUser ? <AuditorDashboard /> : <Navigate to="/" />}
+        element={
+          loggedInUser && loggedInUser.role === "auditor" ? (
+            <AuditorDashboard loggedInUser={loggedInUser} />
+          ) : (
+            <Navigate to="/" />
+          )
+        }
       />
-
-      {/* Panel de supplier */}
       <Route
         path="/supplier"
-        element={loggedInUser ? <SupplierDashboard /> : <Navigate to="/" />}
+        element={
+          loggedInUser && loggedInUser.role === "supplier" ? (
+            <SupplierDashboard loggedInUser={loggedInUser} />
+          ) : (
+            <Navigate to="/" />
+          )
+        }
       />
-
-      <Route
-        path="/add-building"
-        element={loggedInUser ? <AddBuilding /> : <Navigate to="/" />}
-      />
-      <Route
-        path="/add-user"
-        element={loggedInUser ? <AddUser /> : <Navigate to="/" />}
-      />
-      <Route
-        path="/edit-user/:userId"
-        element={loggedInUser ? <EditUser /> : <Navigate to="/" />}
-      />
-      <Route
-        path="/view-user/:userId"
-        element={loggedInUser ? <ViewUser /> : <Navigate to="/" />}
-      />
-      <Route
-        path="/add-data"
-        element={loggedInUser ? <AddDataForm /> : <Navigate to="/" />}
-      />
-      <Route
-        path="/update-data/:docId"
-        element={loggedInUser ? <UpdateData /> : <Navigate to="/" />}
-      />
-      <Route
-        path="/test-firestore"
-        element={loggedInUser ? <TestFirestore /> : <Navigate to="/" />}
-      />
+      <Route path="/add-building" element={<AddBuilding />} />
+      <Route path="/add-user" element={<AddUser />} />
+      <Route path="/edit-user/:userId" element={<EditUser />} />
+      <Route path="/view-user/:userId" element={<ViewUser />} />
+      <Route path="/add-data" element={<AddDataForm />} />
+      <Route path="/update-data/:docId" element={<UpdateData />} />
+      <Route path="/test-firestore" element={<TestFirestore />} />
     </Routes>
   );
 };
