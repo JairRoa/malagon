@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetError, setResetError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -50,10 +51,28 @@ const Login = () => {
           throw new Error(`Rol desconocido: ${userData.role}`);
       }
     } catch (err) {
-      console.error("Error al iniciar sesión:", err);
-      setError(`Error al iniciar sesión: ${err.message}`);
+      console.error("Error al iniciar sesión:", err.message);
+      setError("Error al iniciar sesión. Por favor, verifica tus credenciales.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setResetError("Por favor, introduce tu correo electrónico.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert(
+        "Se ha enviado un correo de restablecimiento de contraseña. Por favor, revisa tu bandeja de entrada."
+      );
+      setResetError("");
+    } catch (err) {
+      console.error("Error al enviar correo de restablecimiento:", err.message);
+      setResetError("No se pudo enviar el correo de restablecimiento. Por favor, verifica tu correo.");
     }
   };
 
@@ -89,11 +108,27 @@ const Login = () => {
             border: "none",
             borderRadius: 5,
             cursor: loading ? "not-allowed" : "pointer",
+            marginBottom: 10,
           }}
         >
           {loading ? "Cargando..." : "Iniciar Sesión"}
         </button>
       </form>
+      <button
+        onClick={handleForgotPassword}
+        style={{
+          width: "100%",
+          padding: 10,
+          backgroundColor: "#6c757d",
+          color: "#fff",
+          border: "none",
+          borderRadius: 5,
+          cursor: "pointer",
+        }}
+      >
+        Olvidé mi Contraseña
+      </button>
+      {resetError && <p style={{ color: "red", marginTop: 10 }}>{resetError}</p>}
     </div>
   );
 };
