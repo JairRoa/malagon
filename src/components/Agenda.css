@@ -1,0 +1,54 @@
+/* Fondo del modal y estilos del contenido */
+.overlay {
+    background-color: rgba(255, 255, 255, 1) !important;
+    z-index: 999;
+  }
+  
+  .ReactModal__Content {
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    margin: auto;
+  }
+  
+  /* Estilos generales para los campos */
+  input[type="text"],
+  input[type="time"],
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+  
+  /* Botones */
+  button {
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  
+  button:hover {
+    opacity: 0.9;
+  }
+  
+  /* Botón Agregar */
+  .add-button {
+    background-color: #28a745;
+    color: #fff;
+  }
+  
+  /* Botón Cancelar */
+  .cancel-button {
+    background-color: #dc3545;
+    color: #fff;
+  }
+  
